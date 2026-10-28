@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel del catálogo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap bar">
+    <a class="logo" href="index.html" id="brand"></a>
+    <span class="tag">Panel</span>
+    <span class="sp"></span>
+    <a class="btn ghost sm" href="index.html">Ver tienda</a>
+    <button class="btn ghost sm" id="logout" type="button" hidden>Salir</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="v-config" class="box narrow" hidden>
+    <h1>Falta conectar Supabase</h1>
+    <p>Abre el archivo <b>config.js</b> y pega tu URL y tu clave. La guía <b>README.md</b> explica cómo conseguirlas.</p>
+  </section>
+
+  <section id="v-login" class="box narrow" hidden>
+    <h1>Entrar al panel</h1>
+    <p class="muted">Usa el correo y la contraseña que creaste en Supabase.</p>
+    <form id="lform" novalidate>
+      <div class="field"><label for="lEmail">Correo</label><input id="lEmail" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="lPass">Contraseña</label><input id="lPass" type="password" autocomplete="current-password" required></div>
+      <p class="err" id="lErr" role="alert"></p>
+      <button class="btn" type="submit" id="lBtn">Entrar</button>
+    </form>
+  </section>
+
+  <section id="v-panel" class="cols" hidden>
+    <form id="pform" class="box side" novalidate>
+      <h2 id="fTitle">Subir camisa</h2>
+
+      <div class="field"><label for="fMarca">Marca</label>
+        <input id="fMarca" type="text" list="marcasList" autocomplete="off" placeholder="Ej. Norte">
+        <datalist id="marcasList"></datalist>
+      </div>
+
+      <div class="two">
+        <div class="field"><label for="fTalla">Talla</label>
+          <select id="fTalla"></select>
+        </div>
+        <div class="field"><label for="fPrecio">Precio (Q)</label>
+          <input id="fPrecio" type="number" inputmode="decimal" min="0" step="0.01" placeholder="77">
+        </div>
+      </div>
+
+      <div class="field"><span class="lab">Foto</span>
+        <label class="drop" id="drop" for="fFoto">
+          <img id="prev" alt="" hidden>
+          <span id="dropTxt">Toca para elegir una foto o arrástrala aquí.<small>Mejor vertical. Se reduce sola para cargar rápido.</small></span>
+        </label>
+        <input id="fFoto" type="file" accept="image/*" hidden>
+        <button type="button" class="link" id="rmPhoto" hidden>Quitar foto</button>
+      </div>
+
+      <label class="sw"><input type="checkbox" id="fDisp" checked><span class="knob"></span>Disponible</label>
+
+      <p class="err" id="fErr" role="alert"></p>
+      <div class="acts">
+        <button class="btn" type="submit" id="fBtn">Subir camisa</button>
+        <button class="btn ghost" type="button" id="fCancel" hidden>Cancelar</button>
+      </div>
+    </form>
+
+    <section class="main">
+      <div class="listbar">
+        <h2 id="lTitle">Camisas subidas</h2>
+        <input id="lq" type="search" placeholder="Buscar marca o talla" aria-label="Buscar en la lista">
+      </div>
+      <div id="list" class="list"></div>
+    </section>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
