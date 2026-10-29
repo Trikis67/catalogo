@@ -28,6 +28,7 @@ function friendly(err) {
   const m = (err && err.message) || String(err);
   const code = err && err.code;
   if (code === "23505" || /duplicate key|unique/i.test(m)) return "Ese código ya existe. Usa otro, por ejemplo " + nextCode() + ".";
+  if (/column .*(tipo).* does not exist|could not find the .*(tipo)/i.test(m)) return "Falta ejecutar migracion_gorras.sql en Supabase (SQL Editor).";
   if (/column .*(fotos).* does not exist|could not find the .*(fotos)/i.test(m)) return "Falta ejecutar migracion_fotos.sql en Supabase (SQL Editor).";
   if (/column .*(codigo|tallas).* does not exist|could not find the .*(codigo|tallas)/i.test(m)) return "Falta ejecutar migracion.sql en Supabase (SQL Editor).";
   if (/row-level security|violates row|permission|not authorized|403/i.test(m)) return "No tienes permiso. Entra con el mismo correo que pusiste en el SQL de Supabase.";
@@ -117,6 +118,15 @@ function checkCodeHint() {
 $("#fCodigo").addEventListener("input", checkCodeHint);
 $("#fCodigo").addEventListener("blur", () => { $("#fCodigo").value = cleanCode($("#fCodigo").value); checkCodeHint(); });
 
+/* ===== Tipo: playera o gorra ===== */
+const getTipo = () => (document.querySelector('input[name="tipo"]:checked') || {}).value || "playera";
+function setTipo(t) {
+  document.querySelectorAll('input[name="tipo"]').forEach(i => { i.checked = i.value === t; });
+  syncTipo();
+}
+function syncTipo() { $("#tallaBox").hidden = getTipo() === "gorra"; }
+document.querySelectorAll('input[name="tipo"]').forEach(i => i.addEventListener("change", syncTipo));
+
 /* ===== Tallas ===== */
 const sizeBoxes = () => [...document.querySelectorAll("#tallaChips input")];
 const getSizes = () => sizeBoxes().filter(i => i.checked).map(i => i.value).sort((a, b) => sizeIdx(a) - sizeIdx(b));
@@ -145,7 +155,7 @@ function renderList() {
     .sort((a, b) => norm(a.marca).localeCompare(norm(b.marca), "es") || byCode(a, b));
   const counts = {};
   list.forEach(r => { const k = norm(r.marca); counts[k] = (counts[k] || 0) + 1; });
-  $("#lTitle").textContent = "Camisas subidas (" + rows.length + ")";
+  $("#lTitle").textContent = "Productos subidos (" + rows.length + ")";
   let html = "", last = null, i = 0;
   list.forEach(r => {
     const k = norm(r.marca);
@@ -154,14 +164,14 @@ function renderList() {
     html += '<div class="row" style="animation-delay:' + Math.min(i++, 10) * 40 + 'ms">'
       + '<div class="th">' + (rowPhotos(r)[0] ? '<img src="' + esc(rowPhotos(r)[0].url) + '" alt="" loading="lazy">' : "Sin foto") + (rowPhotos(r).length > 1 ? '<b class="nf">' + rowPhotos(r).length + "</b>" : "") + "</div>"
       + '<div class="i"><span class="code">' + esc(r.codigo || "") + "</span><b>" + esc(r.marca) + "</b>"
-      + '<div class="sz">' + tallas.map(t => "<i>" + esc(t) + "</i>").join("") + "<em>" + money(r.precio) + "</em></div></div>"
+      + '<div class="sz">' + (r.tipo === "gorra" ? "<i>Gorra</i>" : tallas.map(t => "<i>" + esc(t) + "</i>").join("")) + "<em>" + money(r.precio) + "</em></div></div>"
       + '<div class="ops">'
       + '<button type="button" class="op ' + (r.disponible ? "on" : "off") + '" data-act="toggle" data-id="' + r.id + '">' + (r.disponible ? "Disponible" : "Agotado") + "</button>"
       + '<button type="button" class="op" data-act="edit" data-id="' + r.id + '">Editar</button>'
       + '<button type="button" class="op danger" data-act="del" data-id="' + r.id + '">Borrar</button>'
       + "</div></div>";
   });
-  $("#list").innerHTML = html || '<div class="none">' + (rows.length ? "No hay resultados." : "Todavía no has subido camisas. Usa el formulario.") + "</div>";
+  $("#list").innerHTML = html || '<div class="none">' + (rows.length ? "No hay resultados." : "Todavía no has subido productos. Usa el formulario.") + "</div>";
 }
 $("#lq").oninput = renderList;
 
@@ -189,7 +199,7 @@ $("#list").addEventListener("click", async e => {
     const paths = rowPhotos(r).map(p => p.path).filter(Boolean);
     if (paths.length) await sb.storage.from(BUCKET).remove(paths);
     if (editing && editing.id === r.id) resetForm();
-    toast("Camisa borrada."); loadRows();
+    toast("Producto borrado."); loadRows();
   }
 });
 
@@ -209,21 +219,21 @@ $("#gstrip").addEventListener("click", e => {
   renderStrip();
 });
 function resetForm(keepBrand) {
-  const marca = keepBrand ? $("#fMarca").value : "";
+  const marca = keepBrand ? $("#fMarca").value : "", tipoPrev = keepBrand ? getTipo() : "playera";
   editing = null; photos = [];
   $("#pform").reset(); $("#fDisp").checked = true; $("#fFoto").value = "";
-  $("#fMarca").value = marca; setSizes([]);
+  $("#fMarca").value = marca; setSizes([]); setTipo(tipoPrev);
   $("#fCodigo").value = nextCode();
   renderStrip(); $("#fErr").textContent = "";
-  $("#fTitle").textContent = "Subir camisa"; $("#fBtn").textContent = "Subir camisa"; $("#fCancel").hidden = true;
+  $("#fTitle").textContent = "Subir producto"; $("#fBtn").textContent = "Subir producto"; $("#fCancel").hidden = true;
   renderBrandChips(); checkCodeHint();
 }
 function startEdit(r) {
   editing = r; photos = rowPhotos(r);
-  $("#fCodigo").value = r.codigo || ""; $("#fMarca").value = r.marca; setSizes(r.tallas || []);
+  $("#fCodigo").value = r.codigo || ""; $("#fMarca").value = r.marca; setSizes(r.tallas || []); setTipo(r.tipo === "gorra" ? "gorra" : "playera");
   $("#fPrecio").value = r.precio; $("#fDisp").checked = !!r.disponible;
   renderStrip(); $("#fErr").textContent = "";
-  $("#fTitle").textContent = "Editar camisa"; $("#fBtn").textContent = "Guardar cambios"; $("#fCancel").hidden = false;
+  $("#fTitle").textContent = "Editar producto"; $("#fBtn").textContent = "Guardar cambios"; $("#fCancel").hidden = false;
   renderBrandChips(); checkCodeHint();
   $("#pform").scrollIntoView({ behavior: "smooth", block: "start" });
   $("#fMarca").focus({ preventScroll: true });
@@ -277,7 +287,8 @@ $("#pform").addEventListener("submit", async e => {
   const typed = $("#fMarca").value.trim();
   if (!typed) { err.textContent = "Escribe o elige la marca."; $("#fMarca").focus(); return; }
   const marca = brandMap().get(norm(typed)) || typed;     // usa la marca que ya existe si es la misma
-  const tallas = getSizes();
+  const tipo = getTipo();
+  const tallas = tipo === "gorra" ? ["Única"] : getSizes();
   if (!tallas.length) { err.textContent = "Elige al menos una talla."; return; }
   const precio = Number($("#fPrecio").value), disponible = $("#fDisp").checked;
   if (!$("#fPrecio").value || isNaN(precio) || precio < 0) { err.textContent = "Escribe un precio válido."; $("#fPrecio").focus(); return; }
@@ -298,7 +309,7 @@ $("#pform").addEventListener("submit", async e => {
       final.push({ url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl, path });
     }
     const oldPaths = before.map(p => p.path).filter(pa => pa && !keepPaths.has(pa));
-    const body = { codigo, marca, tallas, precio, disponible,
+    const body = { codigo, marca, tipo, tallas, precio, disponible,
       foto_url: final[0] ? final[0].url : null, foto_path: final[0] ? final[0].path : null,
       fotos: final.map(p => p.url), fotos_paths: final.map(p => p.path) };
     const res = editing ? await sb.from("productos").update(body).eq("id", editing.id) : await sb.from("productos").insert(body);

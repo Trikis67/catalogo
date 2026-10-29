@@ -45,7 +45,14 @@
 
   <section id="v-panel" class="cols" hidden>
     <form id="pform" class="box side" novalidate>
-      <h2 id="fTitle">Subir camisa</h2>
+      <h2 id="fTitle">Subir producto</h2>
+
+      <fieldset class="field"><legend class="lab">¿Qué es?</legend>
+        <div class="seg" id="tipoSeg">
+          <label><input type="radio" name="tipo" value="playera" checked><span>Playera</span></label>
+          <label><input type="radio" name="tipo" value="gorra"><span>Gorra</span></label>
+        </div>
+      </fieldset>
 
       <div class="field"><label for="fCodigo">Código</label>
         <input id="fCodigo" type="text" autocomplete="off" spellcheck="false" maxlength="21" placeholder="#001">
@@ -58,7 +65,7 @@
         <small class="hint" id="marcaHint"></small>
       </div>
 
-      <fieldset class="field"><legend class="lab">Tallas (elige las que tiene esta foto)</legend>
+      <fieldset class="field" id="tallaBox"><legend class="lab">Tallas (elige las que tiene esta foto)</legend>
         <div class="chips big" id="tallaChips"></div>
         <div class="quick">
           <button type="button" class="link" id="qSXL">S a XL</button>
@@ -82,7 +89,7 @@
 
       <p class="err" id="fErr" role="alert"></p>
       <div class="acts">
-        <button class="btn" type="submit" id="fBtn">Subir camisa</button>
+        <button class="btn" type="submit" id="fBtn">Subir producto</button>
         <button class="btn ghost" type="button" id="fCancel" hidden>Cancelar</button>
       </div>
     </form>

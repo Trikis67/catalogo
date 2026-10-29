@@ -20,6 +20,7 @@ Archivos:
 | `setup.sql` | Instalación nueva: crea la tabla, la carpeta de fotos y las reglas de seguridad |
 | `migracion.sql` | Si ya habías ejecutado una versión anterior: agrega códigos y varias tallas sin perder nada |
 | `migracion_fotos.sql` | Agrega la opción de varias fotos por camisa (ejecútalo una vez, no lleva tu correo) |
+| `migracion_gorras.sql` | Agrega el apartado de gorras (ejecútalo una vez, no lleva tu correo) |
 | `favicon.svg`, `apple-touch-icon.png` | El ícono de la pestaña del navegador y de la pantalla de inicio del celular |
 
 Mientras no conectes Supabase, la tienda muestra productos de ejemplo.
@@ -99,6 +100,7 @@ Consejos para las fotos: mejor verticales (como 4 por 5) y con buena luz. El pan
 | El panel dice "Correo o contraseña incorrectos" | El usuario se creó en **Authentication → Users**; revisa el correo y la contraseña |
 | "No tienes permiso" al subir | El correo con el que entras no es el que pusiste en `setup.sql`. Corrígelo y vuelve a ejecutar el archivo |
 | La foto no se sube | Ejecuta `setup.sql` completo otra vez; crea la carpeta `productos` y sus permisos |
+| El panel dice "Falta ejecutar migracion_gorras.sql" | Ejecuta `migracion_gorras.sql` en SQL Editor |
 | El panel dice "Falta ejecutar migracion_fotos.sql" | Ejecuta `migracion_fotos.sql` en SQL Editor |
 | El panel dice "Falta ejecutar migracion.sql" | La tabla aún no tiene códigos ni tallas múltiples: ejecuta `migracion.sql` en SQL Editor |
 | "Ese código ya existe" | Cada foto necesita un código distinto; usa el que propone el panel |
