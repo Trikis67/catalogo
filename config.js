@@ -16,8 +16,8 @@ window.CATALOGO = {
   tagline: "Elige tu talla, agrega al pedido y confirma por WhatsApp.",
 
   /* WhatsApp: código de país + número, sin espacios ni signos (Guatemala = 502) */
-  whatsapp: "50200000000",
-  whatsappLabel: "+502 0000 0000",
+  whatsapp: "50255940361",
+  whatsappLabel: "+502 5594 0361",
 
   currency: "Q",
 
