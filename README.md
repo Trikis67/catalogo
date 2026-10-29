@@ -1,6 +1,10 @@
 # Catálogo con panel de administrador
 
-Una tienda tipo catálogo con carrito y pedido por WhatsApp, más un panel privado para subir camisas con **marca, talla, precio y foto**.
+Una tienda tipo catálogo con carrito y pedido por WhatsApp, más un panel privado para subir camisas con **código (#), marca, tallas, precio y foto**.
+
+- Cada foto lleva un **código** que empieza con `#` (por ejemplo `#014`) para encontrarla y administrarla fácil.
+- Una misma foto puede tener **varias tallas** (por ejemplo L y XL): se sube una sola vez.
+- Las **marcas** se eligen de una lista o se escribe una nueva; en la tienda las camisas de una misma marca salen juntas.
 
 - La tienda y el panel son páginas fijas: se publican gratis en **GitHub Pages**.
 - Los productos y las fotos se guardan en **Supabase** (plan gratuito, sin tarjeta).
@@ -13,7 +17,9 @@ Archivos:
 | `index.html`, `style.css`, `store.js` | La tienda que ven tus clientes |
 | `admin.html`, `admin.css`, `admin.js` | El panel donde subes camisas |
 | `config.js` | Tus datos: Supabase, nombre de la tienda y WhatsApp |
-| `setup.sql` | Crea la tabla, la carpeta de fotos y las reglas de seguridad |
+| `setup.sql` | Instalación nueva: crea la tabla, la carpeta de fotos y las reglas de seguridad |
+| `migracion.sql` | Si ya habías ejecutado una versión anterior: agrega códigos y varias tallas sin perder nada |
+| `favicon.svg`, `apple-touch-icon.png` | El ícono de la pestaña del navegador y de la pantalla de inicio del celular |
 
 Mientras no conectes Supabase, la tienda muestra productos de ejemplo.
 
@@ -31,6 +37,10 @@ Mientras no conectes Supabase, la tienda muestra productos de ejemplo.
 2. Usa buscar y reemplazar: cambia **TU_CORREO@gmail.com** por el correo con el que vas a entrar al panel. Aparece varias veces, cámbialas todas.
 3. En Supabase abre **SQL Editor**, pulsa **New query**, pega todo el contenido y pulsa **Run**.
 4. Debe decir que se ejecutó con éxito. Si lo vuelves a correr no pasa nada, es seguro.
+
+### ¿Ya ejecutaste una versión anterior de setup.sql?
+
+No lo repitas. En su lugar abre `migracion.sql`, pégalo en **SQL Editor → New query** y pulsa **Run**. No necesita tu correo y no borra tus camisas: a las que ya tienes les asigna un código (`#001`, `#002`...) y convierte su talla a la lista nueva de tallas. Si lo ejecutas dos veces no pasa nada.
 
 ## Paso 3. Crear tu usuario administrador
 
@@ -59,8 +69,13 @@ Tu tienda queda en esa dirección y el panel en `.../admin.html`.
 ## Paso 6. Subir tus camisas
 
 1. Abre `tu-direccion/admin.html` e inicia sesión con tu correo y contraseña.
-2. Llena **marca**, **talla** y **precio**, elige la **foto** y pulsa **Subir camisa**. Aparece al instante en la tienda.
-3. En la lista puedes marcar una camisa como **Agotado** o **Disponible**, **Editar** o **Borrar**.
+2. El **código** se propone solo (`#001`, `#002`...). Puedes cambiarlo, pero debe empezar con `#` y no repetirse.
+3. En **marca** escribe una nueva o toca una de las que ya existen. Si escribes "nautica" y ya existe "Náutica", se guarda como "Náutica" para que queden juntas.
+4. En **tallas** marca todas las que tiene esa foto (puedes elegir varias). El botón "S a XL" marca las cuatro de una vez.
+5. Escribe el **precio**, elige la **foto** y pulsa **Subir camisa**. Aparece al instante en la tienda. Si vas a subir varias de la misma marca, la marca se queda escrita.
+6. En la lista (agrupada por marca) puedes buscar por `#código`, marcar una camisa como **Agotado** o **Disponible**, **Editar** (por ejemplo para agregarle una talla) o **Borrar**.
+
+En la tienda, cada camisa muestra sus tallas como botones y el cliente elige la suya antes de agregar al pedido.
 
 Consejos para las fotos: mejor verticales (como 4 por 5) y con buena luz. El panel las reduce solo antes de subirlas.
 
@@ -83,4 +98,7 @@ Consejos para las fotos: mejor verticales (como 4 por 5) y con buena luz. El pan
 | El panel dice "Correo o contraseña incorrectos" | El usuario se creó en **Authentication → Users**; revisa el correo y la contraseña |
 | "No tienes permiso" al subir | El correo con el que entras no es el que pusiste en `setup.sql`. Corrígelo y vuelve a ejecutar el archivo |
 | La foto no se sube | Ejecuta `setup.sql` completo otra vez; crea la carpeta `productos` y sus permisos |
+| El panel dice "Falta ejecutar migracion.sql" | La tabla aún no tiene códigos ni tallas múltiples: ejecuta `migracion.sql` en SQL Editor |
+| "Ese código ya existe" | Cada foto necesita un código distinto; usa el que propone el panel |
+| El número de WhatsApp no cambió en la página | ¿Subiste `config.js`? Después de subirlo recarga con Ctrl+F5 (el navegador guarda copias viejas) |
 | Cambié algo en GitHub y no se ve | Espera un par de minutos y recarga con Ctrl+F5 |
