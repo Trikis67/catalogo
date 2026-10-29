@@ -90,7 +90,6 @@ $("#num").textContent = CONFIG.whatsappLabel;
     var a = $(x[0]); if (!a) return;
     if (x[1]) a.href = x[1]; else a.hidden = true;
   });
-  if (!C.tiktok && !C.facebook) $("#redes").hidden = true;
 })();
 $("#footBrand").textContent = CONFIG.brand;
 $("#yr").textContent = new Date().getFullYear();

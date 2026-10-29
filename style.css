@@ -287,3 +287,11 @@ fieldset.field{border:0;padding:0;margin:0}
 .lbn{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:56px;border:2px solid var(--ink);background:var(--paper);font-size:32px;line-height:1;cursor:pointer;padding:0 0 4px}
 .lbn.l{left:12px}.lbn.r{right:12px}
 .lbc{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;padding:4px 10px;background:var(--paper);border:2px solid var(--ink)}
+
+/* v7: redes en la cabecera */
+.tools{display:flex;align-items:center;gap:8px}
+.soc{width:44px;height:44px;display:grid;place-items:center;border:2px solid var(--ink);color:var(--ink);background:var(--paper);transition:background .2s,color .2s,transform .2s var(--ease)}
+.soc svg{width:22px;height:22px}
+.soc:hover,.soc:focus-visible{background:var(--ink);color:#fff;transform:translateY(-2px)}
+#lnkFacebook:hover{background:#1877F2;border-color:#1877F2}
+@media(max-width:380px){.soc{width:40px;height:40px}.soc svg{width:20px;height:20px}.tools{gap:6px}}
