@@ -1,5 +1,6 @@
-/* Tienda: lee los productos de Supabase (o muestra ejemplos si aún no lo conectas)
-   y maneja filtros, pedido y envío por WhatsApp. */
+/* Tienda: lee los productos de Supabase (o muestra ejemplos si aún no lo conectas).
+   Cada foto tiene un código (#001), una marca y una o varias tallas.
+   Maneja filtros, grupos por marca, pedido y envío por WhatsApp. */
 const C = window.CATALOGO || {};
 const CONFIG = {
   brand: C.brand || "Catálogo",
@@ -13,42 +14,57 @@ const CONFIG = {
 const configured = !!(C.supabaseUrl && C.supabaseKey && !/TU-PROYECTO/.test(C.supabaseUrl) && !/TU_CLAVE/.test(C.supabaseKey));
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL"];
 const PALETTE = ["#1F3A5F", "#2B2B2B", "#7A1F2B", "#2E6B4F", "#3C5A8A", "#B5483A", "#8E8E8E", "#C9A227"];
-/* Productos de ejemplo: se usan solo mientras no conectes Supabase. [marca, talla, precio, disponible] */
+/* Productos de ejemplo: se usan solo mientras no conectes Supabase. [código, marca, tallas, precio, disponible] */
 const DEMO = [
-  ["Norte", "S", 77, 1], ["Atlas", "S", 85, 1], ["Volta", "S", 77, 0], ["Kiru", "S", 95, 1],
-  ["Norte", "M", 60, 1], ["Atlas", "M", 85, 1], ["Volta", "M", 77, 1], ["Brisa", "M", 70, 0],
-  ["Norte", "L", 77, 1], ["Kiru", "L", 95, 1], ["Atlas", "L", 85, 1], ["Brisa", "L", 70, 1],
-  ["Volta", "XL", 77, 1], ["Norte", "XL", 77, 1], ["Kiru", "XL", 95, 0], ["Atlas", "XL", 85, 1]
+  ["#001", "Náutica", ["S", "M", "L", "XL"], 85, 1], ["#002", "Náutica", ["M", "L", "XL"], 85, 1],
+  ["#003", "Náutica", ["S", "M"], 95, 0], ["#004", "Norte", ["S", "M", "L"], 77, 1],
+  ["#005", "Norte", ["L", "XL"], 77, 1], ["#006", "Atlas", ["S", "M", "L", "XL"], 70, 1],
+  ["#007", "Atlas", ["M", "L"], 70, 1], ["#008", "Volta", ["S", "L", "XL"], 90, 1],
+  ["#009", "Kiru", ["M", "L", "XL"], 95, 1], ["#010", "Kiru", ["S", "M"], 95, 1]
 ];
 
 /* ===== Utilidades ===== */
 const $ = s => document.querySelector(s);
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const money = n => CONFIG.currency + " " + n.toLocaleString("es-GT", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
-const fullName = p => p.marca + " talla " + p.size;
+const norm = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+const two = n => String(n).padStart(2, "0");
+const sizeIdx = s => { const i = SIZE_ORDER.indexOf(s); return i < 0 ? 99 : i; };
+const byCodeOrder = (a, b) => a.code.localeCompare(b.code, "es", { numeric: true });
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function hashColor(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; }
 function luminance(hex) { const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
+function mk(id, code, marca, sizes, price, foto, stock) {
+  const m = String(marca || "").trim();
+  return {
+    id: String(id), code: String(code), marca: m, bk: norm(m),
+    sizes: [...new Set(sizes || [])].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b)),
+    price: Number(price), foto: foto || "", stock: !!stock, color: hashColor(norm(m))
+  };
+}
+const fullName = (p, size) => p.marca + " talla " + size;
 /* Foto real si existe; si no, una playera dibujada del color de la marca */
 function pic(p, cls) {
   const c = cls === undefined ? "shirt" : cls;
-  if (p.foto) return '<img class="' + c + ' photo" src="' + esc(p.foto) + '" alt="' + esc(fullName(p)) + '" loading="lazy">';
+  if (p.foto) return '<img class="' + c + ' photo" src="' + esc(p.foto) + '" alt="' + esc(p.marca + " " + p.code) + '" loading="lazy">';
   const ink = luminance(p.color) > .55 ? "#1b1b1b" : "#ffffff";
   return '<svg class="' + c + '" viewBox="0 0 120 120" role="img" aria-label="Playera">'
     + '<path d="M42 10 L18 24 L6 48 L26 56 L32 46 L32 108 L88 108 L88 46 L94 56 L114 48 L102 24 L78 10 C74 22 46 22 42 10 Z" fill="' + p.color + '" stroke="#0A0A0A" stroke-width="2.5" stroke-linejoin="round"/>'
     + '<path d="M44 12 C48 24 72 24 76 12" fill="none" stroke="' + ink + '" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>'
-    + '<text x="60" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="12" font-weight="500" fill="' + ink + '" fill-opacity=".9">' + esc(p.size) + '</text></svg>';
+    + '<text x="60" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="' + ink + '" fill-opacity=".9">' + esc(p.code) + '</text></svg>';
 }
 
 /* ===== Estado ===== */
 let PRODUCTS = [];
 let SIZES = [];
-const state = { size: "", only: false, sort: "", q: "" };
-let cart = {};
+let BRANDS = new Map();            // clave sin acentos -> nombre a mostrar
+const state = { size: "", brand: "", only: false, sort: "", q: "" };
+let pick = {};                     // código -> talla elegida en la tarjeta
+let cart = {};                     // "código|talla" -> cantidad
 let customer = { name: "", phone: "", mode: "recoger", addr: "", note: "" };
-try { const s = localStorage.getItem("catalogo-cart"); if (s) cart = JSON.parse(s) || {}; } catch (e) {}
+try { const s = localStorage.getItem("catalogo-cart-v2"); if (s) cart = JSON.parse(s) || {}; } catch (e) {}
 try { const s = localStorage.getItem("catalogo-cliente"); if (s) customer = Object.assign(customer, JSON.parse(s) || {}); } catch (e) {}
-function saveCart() { try { localStorage.setItem("catalogo-cart", JSON.stringify(cart)); } catch (e) {} }
+function saveCart() { try { localStorage.setItem("catalogo-cart-v2", JSON.stringify(cart)); } catch (e) {} }
 function saveCustomer() { try { localStorage.setItem("catalogo-cliente", JSON.stringify(customer)); } catch (e) {} }
 
 /* ===== Textos fijos ===== */
@@ -69,35 +85,36 @@ if (CONFIG.ticker.length) {
 
 /* ===== Carga de productos ===== */
 function finish() {
-  SIZES = [...new Set(PRODUCTS.map(p => p.size))].sort((a, b) => {
-    const ia = SIZE_ORDER.indexOf(a), ib = SIZE_ORDER.indexOf(b);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
-  });
+  SIZES = [...new Set(PRODUCTS.flatMap(p => p.sizes))].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b));
+  BRANDS = new Map();
+  PRODUCTS.slice().sort(byCodeOrder).forEach(p => { if (p.bk && !BRANDS.has(p.bk)) BRANDS.set(p.bk, p.marca); });
   if (state.size && !SIZES.includes(state.size)) state.size = "";
-  renderCats(); render(); renderCart();
+  if (state.brand && !BRANDS.has(state.brand)) state.brand = "";
+  fillBrandSel(); renderCats(); render(); renderCart();
+}
+function fillBrandSel() {
+  const opts = [...BRANDS.entries()].sort((a, b) => a[1].localeCompare(b[1], "es"));
+  $("#brandSel").innerHTML = '<option value="">Todas las marcas</option>' + opts.map(([k, v]) => '<option value="' + esc(k) + '">' + esc(v) + "</option>").join("");
+  $("#brandSel").value = state.brand;
 }
 async function load() {
   $("#grid").innerHTML = '<div class="skel"></div>'.repeat(6);
   $("#count").textContent = "Cargando…";
   if (!configured) {
-    PRODUCTS = DEMO.map((r, i) => ({
-      id: String(i + 1), code: "P-" + String(i + 1).padStart(3, "0"), marca: r[0], size: r[1],
-      price: r[2], foto: "", stock: !!r[3], color: hashColor(r[0])
-    }));
+    PRODUCTS = DEMO.map((r, i) => mk(i + 1, r[0], r[1], r[2], r[3], "", r[4]));
     $("#notice").hidden = false;
     finish();
     return;
   }
   try {
-    const url = C.supabaseUrl.replace(/\/$/, "") + "/rest/v1/productos?select=id,marca,talla,precio,foto_url,disponible&order=id.desc";
+    const url = C.supabaseUrl.replace(/\/$/, "") + "/rest/v1/productos?select=id,codigo,marca,tallas,precio,foto_url,disponible&order=id.desc";
     const r = await fetch(url, { headers: { apikey: C.supabaseKey }, cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const rows = await r.json();
-    PRODUCTS = rows.map(x => ({
-      id: String(x.id), code: "P-" + String(x.id).padStart(3, "0"), marca: x.marca, size: x.talla,
-      price: Number(x.precio), foto: x.foto_url || "", stock: !!x.disponible, color: hashColor(x.marca || "")
-    }));
+    PRODUCTS = rows.filter(x => Array.isArray(x.tallas) && x.tallas.length)
+      .map(x => mk(x.id, x.codigo, x.marca, x.tallas, x.precio, x.foto_url, x.disponible));
   } catch (e) {
+    console.warn("No se pudieron cargar los productos:", e);
     $("#grid").innerHTML = '<div class="empty">No se pudieron cargar los productos.<br>Revisa tu conexión e inténtalo de nuevo.<br><button type="button" id="retry">Reintentar</button></div>';
     $("#retry").onclick = load;
     $("#count").textContent = "";
@@ -107,32 +124,41 @@ async function load() {
 }
 
 /* ===== Índice de tallas y filtros ===== */
-const two = n => String(n).padStart(2, "0");
 function renderCats() {
   let h = '<button type="button" class="size" data-size="" aria-pressed="' + (state.size === "" ? "true" : "false") + '">Todo<sup>' + two(PRODUCTS.length) + '</sup><small>Ver todo</small></button>';
   SIZES.forEach(s => {
-    const n = PRODUCTS.filter(p => p.size === s).length;
-    h += '<button type="button" class="size" data-size="' + esc(s) + '" aria-pressed="' + (state.size === s ? "true" : "false") + '">' + esc(s) + '<sup>' + two(n) + '</sup><small>Talla</small></button>';
+    const n = PRODUCTS.filter(p => p.sizes.includes(s)).length;
+    h += '<button type="button" class="size" data-size="' + esc(s) + '" aria-pressed="' + (state.size === s ? "true" : "false") + '">' + esc(s) + "<sup>" + two(n) + '</sup><small>Talla</small></button>';
   });
   $("#cats").innerHTML = h;
 }
 $("#cats").addEventListener("click", e => {
   const b = e.target.closest(".size"); if (!b) return;
-  state.size = b.dataset.size; renderCats(); render();
+  state.size = b.dataset.size; pick = {}; renderCats(); render();
 });
 function setOnly(v) { state.only = v; $("#avAll").setAttribute("aria-pressed", String(!v)); $("#avYes").setAttribute("aria-pressed", String(v)); render(); }
 $("#avAll").onclick = () => setOnly(false);
 $("#avYes").onclick = () => setOnly(true);
 $("#sort").onchange = e => { state.sort = e.target.value; render(); };
+$("#brandSel").onchange = e => { state.brand = e.target.value; render(); };
 $("#q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
 
 function visible() {
   let list = PRODUCTS.filter(p =>
-    (!state.size || p.size === state.size) && (!state.only || p.stock) &&
-    (!state.q || (fullName(p) + " " + p.code).toLowerCase().includes(state.q)));
-  if (state.sort === "asc") list = list.slice().sort((a, b) => a.price - b.price);
-  if (state.sort === "desc") list = list.slice().sort((a, b) => b.price - a.price);
+    (!state.size || p.sizes.includes(state.size)) && (!state.brand || p.bk === state.brand) &&
+    (!state.only || p.stock) &&
+    (!state.q || (p.marca + " " + p.code + " " + p.sizes.join(" ")).toLowerCase().includes(state.q)));
+  if (state.sort === "asc") list.sort((a, b) => a.price - b.price);
+  else if (state.sort === "desc") list.sort((a, b) => b.price - a.price);
+  else if (state.sort === "new") list.sort((a, b) => Number(b.id) - Number(a.id));
+  else list.sort((a, b) => (BRANDS.get(a.bk) || "").localeCompare(BRANDS.get(b.bk) || "", "es") || byCodeOrder(a, b));
   return list;
+}
+function selSize(p) {
+  const k = pick[p.code];
+  if (k && p.sizes.includes(k)) return k;
+  if (state.size && p.sizes.includes(state.size)) return state.size;
+  return p.sizes[0];
 }
 function render() {
   if (!PRODUCTS.length) {
@@ -141,20 +167,34 @@ function render() {
     return;
   }
   const list = visible();
-  $("#count").textContent = (state.size ? "Talla " + state.size + " — " : "") + list.length + (list.length === 1 ? " producto" : " productos");
+  const ctx = [state.size ? "Talla " + state.size : "", state.brand ? BRANDS.get(state.brand) : ""].filter(Boolean).join(" · ");
+  $("#count").textContent = (ctx ? ctx + " — " : "") + list.length + (list.length === 1 ? " producto" : " productos");
   if (!list.length) {
     $("#grid").innerHTML = '<div class="empty">No hay productos con esos filtros.<br><button type="button" id="reset">Quitar filtros</button></div>';
-    $("#reset").onclick = () => { state.size = ""; state.q = ""; $("#q").value = ""; setOnly(false); renderCats(); };
+    $("#reset").onclick = () => { state.size = ""; state.brand = ""; state.q = ""; $("#q").value = ""; $("#brandSel").value = ""; setOnly(false); renderCats(); };
     return;
   }
-  $("#grid").innerHTML = list.map((p, i) =>
-    '<article class="card' + (p.stock ? "" : " off") + '" style="--i:' + Math.min(i, 14) + '"><div class="hang">'
-    + '<div class="pic">' + pic(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + '</span></div>'
-    + '<div class="info"><h3 class="nm">' + esc(p.marca) + '</h3><div class="meta"><span>' + p.code + '</span><b>Talla ' + esc(p.size) + '</b></div></div>'
-    + '<div class="buy"><span class="price">' + money(p.price) + '</span>'
-    + '<button class="add" type="button" data-code="' + p.code + '"' + (p.stock ? "" : " disabled") + '>' + (p.stock ? "Agregar" : "Agotado") + '</button></div>'
-    + '</div></article>'
-  ).join("");
+  const grouped = state.sort === "";
+  const counts = {};
+  list.forEach(p => { counts[p.bk] = (counts[p.bk] || 0) + 1; });
+  let html = "", last = null;
+  list.forEach((p, i) => {
+    if (grouped && p.bk !== last) {
+      last = p.bk;
+      html += '<div class="grp"><h3>' + esc(BRANDS.get(p.bk) || p.marca) + "</h3><span>" + two(counts[p.bk]) + (counts[p.bk] === 1 ? " modelo" : " modelos") + "</span></div>";
+    }
+    const sel = selSize(p);
+    html += '<article class="card' + (p.stock ? "" : " off") + '" data-code="' + esc(p.code) + '" style="--i:' + Math.min(i, 14) + '"><div class="hang">'
+      + '<div class="pic">' + pic(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + "</span></div>"
+      + '<div class="info"><h3 class="nm">' + esc(p.marca) + '</h3><div class="meta"><span>' + esc(p.code) + "</span></div>"
+      + '<div class="sz" role="group" aria-label="Elegir talla">'
+      + p.sizes.map(s => '<button type="button" class="szb" data-size="' + esc(s) + '" aria-pressed="' + (s === sel ? "true" : "false") + '"' + (p.stock ? "" : " disabled") + ">" + esc(s) + "</button>").join("")
+      + "</div></div>"
+      + '<div class="buy"><span class="price">' + money(p.price) + "</span>"
+      + '<button class="add" type="button" data-code="' + esc(p.code) + '" data-size="' + esc(sel) + '"' + (p.stock ? "" : " disabled") + ">" + (p.stock ? "Agregar" : "Agotado") + "</button></div>"
+      + "</div></article>";
+  });
+  $("#grid").innerHTML = html;
 }
 
 /* ===== Animación al agregar ===== */
@@ -183,22 +223,35 @@ function fly(card) {
   a.oncancel = () => g.remove();
 }
 $("#grid").addEventListener("click", e => {
+  const sb = e.target.closest(".szb");
+  if (sb && !sb.disabled) {
+    const card = sb.closest(".card"), code = card.dataset.code;
+    pick[code] = sb.dataset.size;
+    card.querySelectorAll(".szb").forEach(x => x.setAttribute("aria-pressed", String(x === sb)));
+    card.querySelector(".add").dataset.size = sb.dataset.size;
+    return;
+  }
   const b = e.target.closest(".add"); if (!b || b.disabled) return;
-  add(b.dataset.code, 1);
+  add(b.dataset.code + "|" + b.dataset.size, 1);
   fly(b.closest(".card"));
-  const old = b.textContent; b.textContent = "Agregado"; b.classList.add("done");
-  setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1000);
+  const old = b.textContent; b.textContent = "Agregado · " + b.dataset.size; b.classList.add("done");
+  setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1100);
 });
 
 /* ===== Pedido (carrito) ===== */
 const byCode = c => PRODUCTS.find(p => p.code === c);
+function parseKey(k) { const i = k.lastIndexOf("|"); return { code: k.slice(0, i), size: k.slice(i + 1) }; }
 function totals() {
-  const codes = Object.keys(cart).filter(c => byCode(c));
-  return { codes, count: codes.reduce((s, c) => s + cart[c], 0), total: codes.reduce((s, c) => s + cart[c] * byCode(c).price, 0) };
+  const keys = Object.keys(cart).filter(k => { const { code, size } = parseKey(k); const p = byCode(code); return p && p.sizes.includes(size); });
+  return {
+    keys,
+    count: keys.reduce((s, k) => s + cart[k], 0),
+    total: keys.reduce((s, k) => s + cart[k] * byCode(parseKey(k).code).price, 0)
+  };
 }
-function add(code, d) {
-  cart[code] = (cart[code] || 0) + d;
-  if (cart[code] <= 0) delete cart[code];
+function add(key, d) {
+  cart[key] = (cart[key] || 0) + d;
+  if (cart[key] <= 0) delete cart[key];
   saveCart(); renderCart();
 }
 function renderCart() {
@@ -210,11 +263,11 @@ function renderCart() {
   $("#dockT").textContent = money(t.total);
   $("#dock").classList.toggle("on", t.count > 0 && !$("#drawer").classList.contains("on"));
   $("#toForm").disabled = t.count === 0;
-  $("#lines").innerHTML = t.codes.length ? t.codes.map(c => {
-    const p = byCode(c);
-    return '<div class="line"><div class="th">' + pic(p, "") + '</div><div class="t"><b>' + esc(fullName(p)) + '</b><span>' + p.code + ' · ' + money(p.price) + '</span>'
-      + '<div class="qty"><button type="button" data-d="-1" data-c="' + c + '" aria-label="Quitar uno">−</button><output>' + cart[c] + '</output><button type="button" data-d="1" data-c="' + c + '" aria-label="Agregar uno">+</button></div></div>'
-      + '<div class="sub">' + money(cart[c] * p.price) + '</div></div>';
+  $("#lines").innerHTML = t.keys.length ? t.keys.map(k => {
+    const { code, size } = parseKey(k), p = byCode(code);
+    return '<div class="line"><div class="th">' + pic(p, "") + '</div><div class="t"><b>' + esc(fullName(p, size)) + "</b><span>" + esc(code) + " · " + money(p.price) + "</span>"
+      + '<div class="qty"><button type="button" data-d="-1" data-c="' + esc(k) + '" aria-label="Quitar uno">−</button><output>' + cart[k] + '</output><button type="button" data-d="1" data-c="' + esc(k) + '" aria-label="Agregar uno">+</button></div></div>'
+      + '<div class="sub">' + money(cart[k] * p.price) + "</div></div>";
   }).join("") : '<div class="none">Tu pedido está vacío.<br>Agrega productos desde el catálogo.</div>';
 }
 $("#lines").addEventListener("click", e => {
@@ -271,7 +324,10 @@ $("#form").addEventListener("submit", e => {
 /* Paso 3: mensaje y enlace de WhatsApp */
 function buildSend() {
   const t = totals();
-  const lines = t.codes.map(c => { const p = byCode(c); return "• " + cart[c] + " x " + fullName(p) + " (" + p.code + ") - " + money(cart[c] * p.price); });
+  const lines = t.keys.map(k => {
+    const { code, size } = parseKey(k), p = byCode(code);
+    return "• " + cart[k] + " x " + fullName(p, size) + " (" + code + ") - " + money(cart[k] * p.price);
+  });
   let msg = "Hola, quiero hacer este pedido:\n" + lines.join("\n") + "\n\nTotal: " + money(t.total) + "\n\nNombre: " + customer.name;
   if (customer.phone) msg += "\nTeléfono: " + customer.phone;
   msg += customer.mode === "envio" ? "\nEntrega: Envío a domicilio\nDirección: " + customer.addr : "\nEntrega: Recoger";

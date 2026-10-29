@@ -4,11 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Panel del catálogo</title>
+<title>Panel · El Rack de las Playeras</title>
+<meta name="theme-color" content="#2B3CFF">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="admin.css?v=3">
 </head>
 <body>
 
@@ -44,18 +47,27 @@
     <form id="pform" class="box side" novalidate>
       <h2 id="fTitle">Subir camisa</h2>
 
-      <div class="field"><label for="fMarca">Marca</label>
-        <input id="fMarca" type="text" list="marcasList" autocomplete="off" placeholder="Ej. Norte">
-        <datalist id="marcasList"></datalist>
+      <div class="field"><label for="fCodigo">Código</label>
+        <input id="fCodigo" type="text" autocomplete="off" spellcheck="false" maxlength="21" placeholder="#001">
+        <small class="hint" id="codeHint">Identifica esta foto. Empieza con # y no se repite.</small>
       </div>
 
-      <div class="two">
-        <div class="field"><label for="fTalla">Talla</label>
-          <select id="fTalla"></select>
+      <div class="field"><label for="fMarca">Marca</label>
+        <input id="fMarca" type="text" autocomplete="off" placeholder="Escribe una marca nueva o elige una">
+        <div class="chips" id="marcaChips" aria-label="Marcas ya creadas"></div>
+        <small class="hint" id="marcaHint"></small>
+      </div>
+
+      <fieldset class="field"><legend class="lab">Tallas (elige las que tiene esta foto)</legend>
+        <div class="chips big" id="tallaChips"></div>
+        <div class="quick">
+          <button type="button" class="link" id="qSXL">S a XL</button>
+          <button type="button" class="link" id="qNone">Quitar todas</button>
         </div>
-        <div class="field"><label for="fPrecio">Precio (Q)</label>
-          <input id="fPrecio" type="number" inputmode="decimal" min="0" step="0.01" placeholder="77">
-        </div>
+      </fieldset>
+
+      <div class="field"><label for="fPrecio" id="precioLab">Precio</label>
+        <input id="fPrecio" type="number" inputmode="decimal" min="0" step="0.01" placeholder="77">
       </div>
 
       <div class="field"><span class="lab">Foto</span>
@@ -79,7 +91,7 @@
     <section class="main">
       <div class="listbar">
         <h2 id="lTitle">Camisas subidas</h2>
-        <input id="lq" type="search" placeholder="Buscar marca o talla" aria-label="Buscar en la lista">
+        <input id="lq" type="search" placeholder="Buscar #código, marca o talla" aria-label="Buscar en la lista">
       </div>
       <div id="list" class="list"></div>
     </section>
@@ -89,8 +101,8 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="config.js"></script>
+<script src="config.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="admin.js"></script>
+<script src="admin.js?v=3"></script>
 </body>
 </html>

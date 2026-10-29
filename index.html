@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Catálogo</title>
+<title>El Rack de las Playeras</title>
+<meta name="theme-color" content="#2B3CFF">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -16,7 +19,7 @@
     <a class="brand" href="#" id="brand"><span id="brandName"></span><small>Catálogo</small></a>
     <label class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Buscar marca o código" autocomplete="off" aria-label="Buscar productos">
+      <input id="q" type="search" placeholder="Buscar marca o código (#12)" autocomplete="off" aria-label="Buscar productos">
     </label>
     <button class="cartbtn" id="cartBtn" type="button" aria-label="Abrir mi pedido"><span>Pedido</span><span class="n" id="cartN">0</span></button>
   </div>
@@ -41,8 +44,10 @@
         <button type="button" id="avAll" aria-pressed="true">Todos</button>
         <button type="button" id="avYes" aria-pressed="false">Disponibles</button>
       </div>
+      <select class="sel" id="brandSel" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select>
       <select class="sel" id="sort" aria-label="Ordenar">
-        <option value="">Más recientes</option>
+        <option value="">Agrupado por marca</option>
+        <option value="new">Más recientes</option>
         <option value="asc">Precio: menor a mayor</option>
         <option value="desc">Precio: mayor a menor</option>
       </select>
@@ -138,7 +143,7 @@
   </section>
 </aside>
 
-<script src="config.js"></script>
-<script src="store.js"></script>
+<script src="config.js?v=3"></script>
+<script src="store.js?v=3"></script>
 </body>
 </html>

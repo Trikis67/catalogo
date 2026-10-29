@@ -3,15 +3,14 @@
    Cambia solo lo que está entre comillas.
    ============================================================ */
 window.CATALOGO = {
-  /* Datos de Supabase (Project Settings > API). La clave "anon" o
-     "publishable" es pública por diseño: la seguridad la dan las
-     reglas que crea el archivo setup.sql. NUNCA pegues aquí la
-     clave "service_role" ni "secret". */
+  /* Datos de Supabase (Project Settings > API Keys). La clave "publishable"
+     (o "anon") es pública por diseño: la seguridad la dan las reglas de
+     setup.sql. NUNCA pegues aquí la clave "secret" ni "service_role". */
   supabaseUrl: "https://fvkkhngnkscqbipfkqjq.supabase.co",
   supabaseKey: "sb_publishable_-IaDZHtDyPOzhkjuLMZT8A_CEX_FzfV",
 
   /* Textos de la tienda */
-  brand: "Tu Catálogo",
+  brand: "El Rack de las Playeras",
   hero: "Playeras por talla",
   tagline: "Elige tu talla, agrega al pedido y confirma por WhatsApp.",
 
