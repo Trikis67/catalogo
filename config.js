@@ -18,6 +18,13 @@ window.CATALOGO = {
   whatsapp: "50255940361",
   whatsappLabel: "+502 5594 0361",
 
+  /* Números que aparecen en "Contacto" (cada uno es un botón verde de WhatsApp).
+     Los pedidos del carrito se envían al número de "whatsapp" de arriba. */
+  contactos: [
+    { label: "+502 5594 0361", whatsapp: "50255940361" },
+    { label: "+502 5471 9056", whatsapp: "50254719056" }
+  ],
+
   /* Redes sociales (se muestran en "Redes") */
   tiktok: "https://www.tiktok.com/@playeron12?_r=1&_t=ZS-9ARYRwki83x",
   facebook: "https://www.facebook.com/share/14po1MjVLiP/",

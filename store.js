@@ -83,7 +83,6 @@ $("#brandName").textContent = CONFIG.brand;
 $("#kicker").textContent = "Catálogo · " + new Date().getFullYear();
 $("#hero").textContent = CONFIG.hero;
 $("#tagline").textContent = CONFIG.tagline;
-$("#num").textContent = CONFIG.whatsappLabel;
 (function () {
   var C = window.CATALOGO || {};
   [["#lnkTiktok", C.tiktok], ["#lnkFacebook", C.facebook]].forEach(function (x) {
@@ -95,7 +94,13 @@ $("#footBrand").textContent = CONFIG.brand;
 $("#yr").textContent = new Date().getFullYear();
 document.title = CONFIG.brand;
 function waUrl(text) { return "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(text); }
-$("#waMain").href = waUrl("Hola, vi tu catálogo y quería consultar algo.");
+(function () {
+  const list = Array.isArray(C.contactos) && C.contactos.length ? C.contactos : [{ label: CONFIG.whatsappLabel, whatsapp: CONFIG.whatsapp }];
+  const ico = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="round"><path d="M4 20l1.5-4.2A8 8 0 1 1 8.2 18.6z"/></svg>';
+  $("#was").innerHTML = list.map(n =>
+    '<a class="wa" href="https://wa.me/' + esc(n.whatsapp) + "?text=" + encodeURIComponent("Hola, vi tu catálogo y quería consultar algo.") + '" target="_blank" rel="noopener">'
+    + ico + "<span><small>WhatsApp</small>" + esc(n.label) + "</span></a>").join("");
+})();
 if (CONFIG.ticker.length) {
   const items = CONFIG.ticker.map(t => "<span>" + esc(t) + "</span>").join("");
   $("#ticker").innerHTML = '<div class="track">' + items.repeat(6) + "</div>";
@@ -365,12 +370,6 @@ $("#editOrder").onclick = () => show("form");
 $("#done").onclick = () => { cart = {}; saveCart(); renderCart(); openCart(false); };
 
 /* ===== Contacto ===== */
-function selectNum() { const r = document.createRange(); r.selectNodeContents($("#num")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
-$("#copyNum").onclick = () => {
-  const b = $("#copyNum");
-  const ok = () => { b.textContent = "Copiado"; setTimeout(() => b.textContent = "Copiar número", 1200); };
-  try { navigator.clipboard.writeText(CONFIG.whatsappLabel).then(ok, selectNum); } catch (e) { selectNum(); }
-};
 $("#brand").addEventListener("click", e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); });
 
 renderCats(); renderCart(); load();

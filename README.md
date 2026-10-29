@@ -65,11 +65,11 @@ La clave pública es segura de publicar. **Nunca pegues la clave `service_role` 
 3. Ve a **Settings → Pages**. En *Build and deployment* elige **Deploy from a branch**, rama **main**, carpeta **/ (root)** y guarda.
 4. Espera un minuto. GitHub te mostrará la dirección, parecida a `https://tu-usuario.github.io/catalogo/`.
 
-Tu tienda queda en esa dirección y el panel en `.../admin.html`.
+Tu tienda queda en esa dirección y el panel en `.../admin`.
 
 ## Paso 6. Subir tus camisas
 
-1. Abre `tu-direccion/admin.html` e inicia sesión con tu correo y contraseña.
+1. Abre `tu-direccion/admin` e inicia sesión con tu correo y contraseña.
 2. El **código** se propone solo (`#001`, `#002`...). Puedes cambiarlo, pero debe empezar con `#` y no repetirse.
 3. En **marca** escribe una nueva o toca una de las que ya existen. Si escribes "nautica" y ya existe "Náutica", se guarda como "Náutica" para que queden juntas.
 4. En **tallas** marca todas las que tiene esa foto (puedes elegir varias). El botón "S a XL" marca las cuatro de una vez.
