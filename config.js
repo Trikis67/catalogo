@@ -7,15 +7,13 @@ window.CATALOGO = {
      "publishable" es pública por diseño: la seguridad la dan las
      reglas que crea el archivo setup.sql. NUNCA pegues aquí la
      clave "service_role" ni "secret". */
-  supabaseUrl: "https://TU-PROYECTO.supabase.co",
-  supabaseKey: "TU_CLAVE_ANON_PUBLICA",
+  supabaseUrl: "https://fvkkhngnkscqbipfkqjq.supabase.co",
+  supabaseKey: "sb_publishable_-IaDZHtDyPOzhkjuLMZT8A_CEX_FzfV",
 
   /* Textos de la tienda */
   brand: "Tu Catálogo",
-  kicker: "Catálogo de temporada",
   hero: "Playeras por talla",
   tagline: "Elige tu talla, agrega al pedido y confirma por WhatsApp.",
-  ticker: ["Pedidos por WhatsApp", "Envíos a todo el país", "Tallas S a XL", "Precios en quetzales"],
 
   /* WhatsApp: código de país + número, sin espacios ni signos (Guatemala = 502) */
   whatsapp: "50200000000",
