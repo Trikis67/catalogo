@@ -34,20 +34,28 @@ const byCodeOrder = (a, b) => a.code.localeCompare(b.code, "es", { numeric: true
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function hashColor(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; }
 function luminance(hex) { const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
-function mk(id, code, marca, sizes, price, foto, stock, fotos) {
+function mk(id, code, marca, sizes, price, foto, stock, fotos, tipo) {
   const m = String(marca || "").trim();
   return {
-    id: String(id), code: String(code), marca: m, bk: norm(m),
+    id: String(id), code: String(code), tipo: tipo === "gorra" ? "gorra" : "playera", marca: m, bk: norm(m),
     sizes: [...new Set(sizes || [])].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b)),
     price: Number(price), foto: foto || "", fotos: (Array.isArray(fotos) && fotos.length ? fotos : (foto ? [foto] : [])).filter(Boolean), stock: !!stock, color: hashColor(norm(m))
   };
 }
-const fullName = (p, size) => p.marca + " talla " + size;
+const fullName = (p, size) => p.tipo === "gorra" ? p.marca + " (gorra)" : p.marca + " talla " + size;
 /* Foto real si existe; si no, una playera dibujada del color de la marca */
+const ink2 = p => luminance(p.color) > .55 ? "#1b1b1b" : "#ffffff";
 function pic(p, cls) {
   const c = cls === undefined ? "shirt" : cls;
   if (p.foto) return '<img class="' + c + ' photo" src="' + esc(p.foto) + '" alt="' + esc(p.marca + " " + p.code) + '" loading="lazy">';
   const ink = luminance(p.color) > .55 ? "#1b1b1b" : "#ffffff";
+  if (p.tipo === "gorra") {
+    return '<svg class="' + c + '" viewBox="0 0 120 120" role="img" aria-label="Gorra">'
+      + '<path d="M20 78 C20 40 44 24 66 24 C88 24 104 44 104 78 Z" fill="' + p.color + '" stroke="#0A0A0A" stroke-width="2.5" stroke-linejoin="round"/>'
+      + '<path d="M16 78 C40 70 80 70 112 86 C112 94 100 96 88 92 C60 84 36 84 16 86 Z" fill="' + p.color + '" stroke="#0A0A0A" stroke-width="2.5" stroke-linejoin="round"/>'
+      + '<circle cx="66" cy="24" r="4" fill="' + ink2(p) + '" stroke="#0A0A0A" stroke-width="2"/>'
+      + '<text x="62" y="62" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="' + ink2(p) + '" fill-opacity=".9">' + esc(p.code) + '</text></svg>';
+  }
   return '<svg class="' + c + '" viewBox="0 0 120 120" role="img" aria-label="Playera">'
     + '<path d="M42 10 L18 24 L6 48 L26 56 L32 46 L32 108 L88 108 L88 46 L94 56 L114 48 L102 24 L78 10 C74 22 46 22 42 10 Z" fill="' + p.color + '" stroke="#0A0A0A" stroke-width="2.5" stroke-linejoin="round"/>'
     + '<path d="M44 12 C48 24 72 24 76 12" fill="none" stroke="' + ink + '" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>'
@@ -68,6 +76,7 @@ function gal(p) {
 /* ===== Estado ===== */
 let PRODUCTS = [];
 let SIZES = [];
+const GORRA = "__gorra";
 let BRANDS = new Map();            // clave sin acentos -> nombre a mostrar
 const state = { size: "", brand: "", only: false, sort: "", q: "" };
 let pick = {};                     // código -> talla elegida en la tarjeta
@@ -108,10 +117,10 @@ if (CONFIG.ticker.length) {
 
 /* ===== Carga de productos ===== */
 function finish() {
-  SIZES = [...new Set(PRODUCTS.flatMap(p => p.sizes))].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b));
+  SIZES = [...new Set(PRODUCTS.filter(p => p.tipo !== "gorra").flatMap(p => p.sizes))].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b));
   BRANDS = new Map();
   PRODUCTS.slice().sort(byCodeOrder).forEach(p => { if (p.bk && !BRANDS.has(p.bk)) BRANDS.set(p.bk, p.marca); });
-  if (state.size && !SIZES.includes(state.size)) state.size = "";
+  if (state.size && state.size !== GORRA && !SIZES.includes(state.size)) state.size = "";
   if (state.brand && !BRANDS.has(state.brand)) state.brand = "";
   fillBrandSel(); renderCats(); render(); renderCart();
 }
@@ -135,7 +144,7 @@ async function load() {
     if (!r.ok) throw new Error("HTTP " + r.status);
     const rows = await r.json();
     PRODUCTS = rows.filter(x => Array.isArray(x.tallas) && x.tallas.length)
-      .map(x => mk(x.id, x.codigo, x.marca, x.tallas, x.precio, x.foto_url, x.disponible, x.fotos));
+      .map(x => mk(x.id, x.codigo, x.marca, x.tallas, x.precio, x.foto_url, x.disponible, x.fotos, x.tipo));
   } catch (e) {
     console.warn("No se pudieron cargar los productos:", e);
     $("#grid").innerHTML = '<div class="empty">No se pudieron cargar los productos.<br>Revisa tu conexión e inténtalo de nuevo.<br><button type="button" id="retry">Reintentar</button></div>';
@@ -150,9 +159,11 @@ async function load() {
 function renderCats() {
   let h = '<button type="button" class="size" data-size="" aria-pressed="' + (state.size === "" ? "true" : "false") + '">Todo<sup>' + two(PRODUCTS.length) + '</sup><small>Ver todo</small></button>';
   SIZES.forEach(s => {
-    const n = PRODUCTS.filter(p => p.sizes.includes(s)).length;
+    const n = PRODUCTS.filter(p => p.tipo !== "gorra" && p.sizes.includes(s)).length;
     h += '<button type="button" class="size" data-size="' + esc(s) + '" aria-pressed="' + (state.size === s ? "true" : "false") + '">' + esc(s) + "<sup>" + two(n) + '</sup><small>Talla</small></button>';
   });
+  const g = PRODUCTS.filter(p => p.tipo === "gorra").length;
+  if (g) h += '<button type="button" class="size" data-size="' + GORRA + '" aria-pressed="' + (state.size === GORRA ? "true" : "false") + '">Gorras<sup>' + two(g) + '</sup><small>Categoría</small></button>';
   $("#cats").innerHTML = h;
 }
 $("#cats").addEventListener("click", e => {
@@ -168,9 +179,9 @@ $("#q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render()
 
 function visible() {
   let list = PRODUCTS.filter(p =>
-    (!state.size || p.sizes.includes(state.size)) && (!state.brand || p.bk === state.brand) &&
+    (!state.size || (state.size === GORRA ? p.tipo === "gorra" : (p.tipo !== "gorra" && p.sizes.includes(state.size)))) && (!state.brand || p.bk === state.brand) &&
     (!state.only || p.stock) &&
-    (!state.q || (p.marca + " " + p.code + " " + p.sizes.join(" ")).toLowerCase().includes(state.q)));
+    (!state.q || (p.marca + " " + p.code + " " + (p.tipo === "gorra" ? "gorra gorras" : p.sizes.join(" "))).toLowerCase().includes(state.q)));
   if (state.sort === "asc") list.sort((a, b) => a.price - b.price);
   else if (state.sort === "desc") list.sort((a, b) => b.price - a.price);
   else if (state.sort === "new") list.sort((a, b) => Number(b.id) - Number(a.id));
@@ -180,7 +191,7 @@ function visible() {
 function selSize(p) {
   const k = pick[p.code];
   if (k && p.sizes.includes(k)) return k;
-  if (state.size && p.sizes.includes(state.size)) return state.size;
+  if (state.size && state.size !== GORRA && p.sizes.includes(state.size)) return state.size;
   return p.sizes[0];
 }
 function render() {
@@ -190,7 +201,7 @@ function render() {
     return;
   }
   const list = visible();
-  const ctx = [state.size ? "Talla " + state.size : "", state.brand ? BRANDS.get(state.brand) : ""].filter(Boolean).join(" · ");
+  const ctx = [state.size === GORRA ? "Gorras" : (state.size ? "Talla " + state.size : ""), state.brand ? BRANDS.get(state.brand) : ""].filter(Boolean).join(" · ");
   $("#count").textContent = (ctx ? ctx + " — " : "") + list.length + (list.length === 1 ? " producto" : " productos");
   if (!list.length) {
     $("#grid").innerHTML = '<div class="empty">No hay productos con esos filtros.<br><button type="button" id="reset">Quitar filtros</button></div>';
@@ -210,7 +221,7 @@ function render() {
     html += '<article class="card' + (p.stock ? "" : " off") + '" data-code="' + esc(p.code) + '" style="--i:' + Math.min(i, 14) + '"><div class="hang">'
       + '<div class="pic">' + gal(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + "</span></div>"
       + '<div class="info"><h3 class="nm">' + esc(p.marca) + '</h3><div class="meta"><span>' + esc(p.code) + "</span></div>"
-      + '<div class="sz" role="group" aria-label="Elegir talla">'
+      + (p.tipo === "gorra" ? '<div class="sz"><span class="uni">Gorra · talla única</span></div><div hidden>' : '<div class="sz" role="group" aria-label="Elegir talla">')
       + p.sizes.map(s => '<button type="button" class="szb" data-size="' + esc(s) + '" aria-pressed="' + (s === sel ? "true" : "false") + '"' + (p.stock ? "" : " disabled") + ">" + esc(s) + "</button>").join("")
       + "</div></div>"
       + '<div class="buy"><span class="price">' + money(p.price) + "</span>"
