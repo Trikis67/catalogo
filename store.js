@@ -34,12 +34,12 @@ const byCodeOrder = (a, b) => a.code.localeCompare(b.code, "es", { numeric: true
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function hashColor(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return PALETTE[h % PALETTE.length]; }
 function luminance(hex) { const h = hex.replace("#", ""); const c = [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16) / 255); return .2126 * c[0] + .7152 * c[1] + .0722 * c[2]; }
-function mk(id, code, marca, sizes, price, foto, stock) {
+function mk(id, code, marca, sizes, price, foto, stock, fotos) {
   const m = String(marca || "").trim();
   return {
     id: String(id), code: String(code), marca: m, bk: norm(m),
     sizes: [...new Set(sizes || [])].sort((a, b) => sizeIdx(a) - sizeIdx(b) || a.localeCompare(b)),
-    price: Number(price), foto: foto || "", stock: !!stock, color: hashColor(norm(m))
+    price: Number(price), foto: foto || "", fotos: (Array.isArray(fotos) && fotos.length ? fotos : (foto ? [foto] : [])).filter(Boolean), stock: !!stock, color: hashColor(norm(m))
   };
 }
 const fullName = (p, size) => p.marca + " talla " + size;
@@ -54,6 +54,17 @@ function pic(p, cls) {
     + '<text x="60" y="92" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="11" font-weight="500" fill="' + ink + '" fill-opacity=".9">' + esc(p.code) + '</text></svg>';
 }
 
+/* Galería de la tarjeta: varias fotos que se deslizan, con flechas y puntos */
+function gal(p) {
+  if (!p.fotos || p.fotos.length < 2) return pic(p);
+  const imgs = p.fotos.map((u, i) => '<img class="photo" src="' + esc(u) + '" alt="' + esc(p.marca + " " + p.code + " foto " + (i + 1)) + '" loading="lazy">').join("");
+  const dots = p.fotos.map((_, i) => '<i' + (i === 0 ? ' class="on"' : "") + "></i>").join("");
+  return '<div class="gal">' + imgs + "</div>"
+    + '<button type="button" class="gp" data-d="-1" aria-label="Foto anterior">&#8249;</button>'
+    + '<button type="button" class="gn" data-d="1" aria-label="Foto siguiente">&#8250;</button>'
+    + '<div class="dots">' + dots + "</div>";
+}
+
 /* ===== Estado ===== */
 let PRODUCTS = [];
 let SIZES = [];
@@ -61,7 +72,7 @@ let BRANDS = new Map();            // clave sin acentos -> nombre a mostrar
 const state = { size: "", brand: "", only: false, sort: "", q: "" };
 let pick = {};                     // código -> talla elegida en la tarjeta
 let cart = {};                     // "código|talla" -> cantidad
-let customer = { name: "", phone: "", mode: "recoger", addr: "", note: "" };
+let customer = { name: "", phone: "", addr: "", note: "" };
 try { const s = localStorage.getItem("catalogo-cart-v2"); if (s) cart = JSON.parse(s) || {}; } catch (e) {}
 try { const s = localStorage.getItem("catalogo-cliente"); if (s) customer = Object.assign(customer, JSON.parse(s) || {}); } catch (e) {}
 function saveCart() { try { localStorage.setItem("catalogo-cart-v2", JSON.stringify(cart)); } catch (e) {} }
@@ -73,6 +84,14 @@ $("#kicker").textContent = "Catálogo · " + new Date().getFullYear();
 $("#hero").textContent = CONFIG.hero;
 $("#tagline").textContent = CONFIG.tagline;
 $("#num").textContent = CONFIG.whatsappLabel;
+(function () {
+  var C = window.CATALOGO || {};
+  [["#lnkTiktok", C.tiktok], ["#lnkFacebook", C.facebook]].forEach(function (x) {
+    var a = $(x[0]); if (!a) return;
+    if (x[1]) a.href = x[1]; else a.hidden = true;
+  });
+  if (!C.tiktok && !C.facebook) $("#redes").hidden = true;
+})();
 $("#footBrand").textContent = CONFIG.brand;
 $("#yr").textContent = new Date().getFullYear();
 document.title = CONFIG.brand;
@@ -107,12 +126,12 @@ async function load() {
     return;
   }
   try {
-    const url = C.supabaseUrl.replace(/\/$/, "") + "/rest/v1/productos?select=id,codigo,marca,tallas,precio,foto_url,disponible&order=id.desc";
+    const url = C.supabaseUrl.replace(/\/$/, "") + "/rest/v1/productos?select=id,codigo,marca,tallas,precio,*&order=id.desc";
     const r = await fetch(url, { headers: { apikey: C.supabaseKey }, cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
     const rows = await r.json();
     PRODUCTS = rows.filter(x => Array.isArray(x.tallas) && x.tallas.length)
-      .map(x => mk(x.id, x.codigo, x.marca, x.tallas, x.precio, x.foto_url, x.disponible));
+      .map(x => mk(x.id, x.codigo, x.marca, x.tallas, x.precio, x.foto_url, x.disponible, x.fotos));
   } catch (e) {
     console.warn("No se pudieron cargar los productos:", e);
     $("#grid").innerHTML = '<div class="empty">No se pudieron cargar los productos.<br>Revisa tu conexión e inténtalo de nuevo.<br><button type="button" id="retry">Reintentar</button></div>';
@@ -185,7 +204,7 @@ function render() {
     }
     const sel = selSize(p);
     html += '<article class="card' + (p.stock ? "" : " off") + '" data-code="' + esc(p.code) + '" style="--i:' + Math.min(i, 14) + '"><div class="hang">'
-      + '<div class="pic">' + pic(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + "</span></div>"
+      + '<div class="pic">' + gal(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + "</span></div>"
       + '<div class="info"><h3 class="nm">' + esc(p.marca) + '</h3><div class="meta"><span>' + esc(p.code) + "</span></div>"
       + '<div class="sz" role="group" aria-label="Elegir talla">'
       + p.sizes.map(s => '<button type="button" class="szb" data-size="' + esc(s) + '" aria-pressed="' + (s === sel ? "true" : "false") + '"' + (p.stock ? "" : " disabled") + ">" + esc(s) + "</button>").join("")
@@ -223,6 +242,12 @@ function fly(card) {
   a.oncancel = () => g.remove();
 }
 $("#grid").addEventListener("click", e => {
+  const arrow = e.target.closest(".gp,.gn");
+  if (arrow) {
+    const g = arrow.closest(".pic").querySelector(".gal");
+    g.scrollBy({ left: Number(arrow.dataset.d) * g.clientWidth, behavior: "smooth" });
+    return;
+  }
   const sb = e.target.closest(".szb");
   if (sb && !sb.disabled) {
     const card = sb.closest(".card"), code = card.dataset.code;
@@ -300,24 +325,20 @@ $("#backBtn").onclick = () => show(step === "send" ? "form" : "cart");
 document.addEventListener("keydown", e => { if (e.key === "Escape") openCart(false); });
 
 /* Paso 2: datos */
-function syncMode() { $("#addrBox").hidden = !$("#mEnv").checked; }
 function fillForm() {
   $("#fName").value = customer.name; $("#fPhone").value = customer.phone;
   $("#fAddr").value = customer.addr; $("#fNote").value = customer.note;
-  $("#mRec").checked = customer.mode !== "envio"; $("#mEnv").checked = customer.mode === "envio";
-  syncMode();
 }
-document.querySelectorAll('input[name="mode"]').forEach(r => r.addEventListener("change", syncMode));
 $("#toForm").onclick = () => { if (!totals().count) return; fillForm(); show("form"); };
 function setErr(msgId, boxId, msg) { $(msgId).textContent = msg; $(boxId).classList.toggle("bad", !!msg); }
 $("#form").addEventListener("submit", e => {
   e.preventDefault();
-  const name = $("#fName").value.trim(), env = $("#mEnv").checked, addr = $("#fAddr").value.trim();
+  const name = $("#fName").value.trim(), addr = $("#fAddr").value.trim();
   setErr("#eName", "#gName", name ? "" : "Escribe tu nombre para identificar el pedido.");
-  setErr("#eAddr", "#addrBox", env && !addr ? "Escribe la dirección para el envío." : "");
+  setErr("#eAddr", "#addrBox", addr ? "" : "Escribe la dirección para el envío.");
   if (!name) { $("#fName").focus(); return; }
-  if (env && !addr) { $("#fAddr").focus(); return; }
-  customer = { name, phone: $("#fPhone").value.trim(), mode: env ? "envio" : "recoger", addr: env ? addr : "", note: $("#fNote").value.trim() };
+  if (!addr) { $("#fAddr").focus(); return; }
+  customer = { name, phone: $("#fPhone").value.trim(), addr, note: $("#fNote").value.trim() };
   saveCustomer(); buildSend(); show("send");
 });
 
@@ -330,11 +351,10 @@ function buildSend() {
   });
   let msg = "Hola, quiero hacer este pedido:\n" + lines.join("\n") + "\n\nTotal: " + money(t.total) + "\n\nNombre: " + customer.name;
   if (customer.phone) msg += "\nTeléfono: " + customer.phone;
-  msg += customer.mode === "envio" ? "\nEntrega: Envío a domicilio\nDirección: " + customer.addr : "\nEntrega: Recoger";
+  msg += "\nEntrega: Envío a domicilio\nDirección: " + customer.addr;
   if (customer.note) msg += "\nNotas: " + customer.note;
   $("#waGo").href = waUrl(msg);
-  const rows = [["Productos", t.count], ["Total", money(t.total)], ["Nombre", customer.name], ["Entrega", customer.mode === "envio" ? "Envío a domicilio" : "Recoger"]];
-  if (customer.mode === "envio") rows.push(["Dirección", customer.addr]);
+  const rows = [["Productos", t.count], ["Total", money(t.total)], ["Nombre", customer.name], ["Entrega", "Envío a domicilio"], ["Dirección", customer.addr]];
   $("#recap").innerHTML = "";
   rows.forEach(r => {
     const d = document.createElement("div"); d.className = "r";
@@ -355,3 +375,45 @@ $("#copyNum").onclick = () => {
 $("#brand").addEventListener("click", e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); });
 
 renderCats(); renderCart(); load();
+
+/* ===== Galería: puntos al deslizar ===== */
+$("#grid").addEventListener("scroll", e => {
+  const g = e.target; if (!g.classList || !g.classList.contains("gal")) return;
+  const i = Math.round(g.scrollLeft / g.clientWidth);
+  g.parentNode.querySelectorAll(".dots i").forEach((d, k) => d.classList.toggle("on", k === i));
+}, true);
+
+/* ===== Ampliar foto (con flechas si hay varias) ===== */
+(function () {
+  const lb = $("#lb"), img = $("#lbImg"), prev = $("#lbP"), next = $("#lbN"), cnt = $("#lbC");
+  let list = [], at = 0;
+  function show() {
+    img.src = list[at]; prev.hidden = next.hidden = list.length < 2;
+    cnt.hidden = list.length < 2; cnt.textContent = (at + 1) + " / " + list.length;
+  }
+  function step(d) { at = (at + d + list.length) % list.length; show(); }
+  function close() { lb.hidden = true; img.src = ""; }
+  $("#grid").addEventListener("click", e => {
+    const t = e.target.closest("img.photo"); if (!t) return;
+    const pic = t.closest(".pic");
+    list = pic ? [...pic.querySelectorAll("img.photo")].map(x => x.src) : [t.src];
+    at = Math.max(0, list.indexOf(t.src)); show(); lb.hidden = false;
+  });
+  prev.onclick = e => { e.stopPropagation(); step(-1); };
+  next.onclick = e => { e.stopPropagation(); step(1); };
+  lb.addEventListener("click", close);
+  $("#lbX").onclick = close;
+  let x0 = null;
+  lb.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", e => {
+    if (x0 === null || list.length < 2) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50) { e.preventDefault(); step(dx < 0 ? 1 : -1); }
+  });
+  document.addEventListener("keydown", e => {
+    if (lb.hidden) return;
+    if (e.key === "Escape") close();
+    if (e.key === "ArrowRight" && list.length > 1) step(1);
+    if (e.key === "ArrowLeft" && list.length > 1) step(-1);
+  });
+})();

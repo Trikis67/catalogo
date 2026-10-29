@@ -10,8 +10,8 @@ const currency = C.currency || "Q";
 let sb = null;
 let rows = [];
 let editing = null;      // fila que se está editando
-let photoBlob = null;    // foto nueva ya reducida
-let removePhoto = false;
+let photos = [];         // fotos del formulario: {url, path} ya subidas o {blob, url} nuevas
+const MAX_PHOTOS = 6;
 let userId = null;
 let delTimer = null;
 
@@ -28,6 +28,7 @@ function friendly(err) {
   const m = (err && err.message) || String(err);
   const code = err && err.code;
   if (code === "23505" || /duplicate key|unique/i.test(m)) return "Ese código ya existe. Usa otro, por ejemplo " + nextCode() + ".";
+  if (/column .*(fotos).* does not exist|could not find the .*(fotos)/i.test(m)) return "Falta ejecutar migracion_fotos.sql en Supabase (SQL Editor).";
   if (/column .*(codigo|tallas).* does not exist|could not find the .*(codigo|tallas)/i.test(m)) return "Falta ejecutar migracion.sql en Supabase (SQL Editor).";
   if (/row-level security|violates row|permission|not authorized|403/i.test(m)) return "No tienes permiso. Entra con el mismo correo que pusiste en el SQL de Supabase.";
   if (/network|failed to fetch/i.test(m)) return "No hay conexión. Revisa tu internet e inténtalo de nuevo.";
@@ -123,6 +124,13 @@ const setSizes = arr => sizeBoxes().forEach(i => { i.checked = arr.includes(i.va
 $("#qSXL").onclick = () => setSizes(["S", "M", "L", "XL"]);
 $("#qNone").onclick = () => setSizes([]);
 
+/* ===== Fotos de una camisa ===== */
+function rowPhotos(r) {
+  const urls = (r.fotos && r.fotos.length) ? r.fotos : (r.foto_url ? [r.foto_url] : []);
+  const paths = (r.fotos_paths && r.fotos_paths.length) ? r.fotos_paths : (r.foto_path ? [r.foto_path] : []);
+  return urls.map((u, i) => ({ url: u, path: paths[i] || "" }));
+}
+
 /* ===== Datos ===== */
 async function loadRows() {
   const { data, error } = await sb.from("productos").select("*").order("id", { ascending: false });
@@ -144,7 +152,7 @@ function renderList() {
     if (k !== last) { last = k; html += '<div class="gh">' + esc(r.marca) + "<span>" + counts[k] + (counts[k] === 1 ? " foto" : " fotos") + "</span></div>"; }
     const tallas = (r.tallas || []).slice().sort((a, b) => sizeIdx(a) - sizeIdx(b));
     html += '<div class="row" style="animation-delay:' + Math.min(i++, 10) * 40 + 'ms">'
-      + '<div class="th">' + (r.foto_url ? '<img src="' + esc(r.foto_url) + '" alt="" loading="lazy">' : "Sin foto") + "</div>"
+      + '<div class="th">' + (rowPhotos(r)[0] ? '<img src="' + esc(rowPhotos(r)[0].url) + '" alt="" loading="lazy">' : "Sin foto") + (rowPhotos(r).length > 1 ? '<b class="nf">' + rowPhotos(r).length + "</b>" : "") + "</div>"
       + '<div class="i"><span class="code">' + esc(r.codigo || "") + "</span><b>" + esc(r.marca) + "</b>"
       + '<div class="sz">' + tallas.map(t => "<i>" + esc(t) + "</i>").join("") + "<em>" + money(r.precio) + "</em></div></div>"
       + '<div class="ops">'
@@ -178,33 +186,43 @@ $("#list").addEventListener("click", async e => {
     }
     const { error } = await sb.from("productos").delete().eq("id", r.id);
     if (error) { toast(friendly(error), true); return; }
-    if (r.foto_path) await sb.storage.from(BUCKET).remove([r.foto_path]);
+    const paths = rowPhotos(r).map(p => p.path).filter(Boolean);
+    if (paths.length) await sb.storage.from(BUCKET).remove(paths);
     if (editing && editing.id === r.id) resetForm();
     toast("Camisa borrada."); loadRows();
   }
 });
 
 /* ===== Formulario ===== */
-function setPreview(url) {
-  const img = $("#prev");
-  if (url) { img.src = url; img.hidden = false; } else { img.removeAttribute("src"); img.hidden = true; }
-  $("#rmPhoto").hidden = !url;
+function renderStrip() {
+  $("#gstrip").innerHTML = photos.map((p, i) =>
+    '<div class="gi"><img src="' + esc(p.url) + '" alt="">' + (i === 0 ? '<span class="main">Principal</span>' : "")
+    + '<div class="go">' + (i > 0 ? '<button type="button" data-a="first" data-i="' + i + '" title="Hacer principal">★</button>' : "")
+    + '<button type="button" data-a="rm" data-i="' + i + '" title="Quitar">×</button></div></div>').join("");
+  $("#drop").hidden = photos.length >= MAX_PHOTOS;
 }
+$("#gstrip").addEventListener("click", e => {
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const i = Number(b.dataset.i);
+  if (b.dataset.a === "rm") photos.splice(i, 1);
+  else photos.unshift(photos.splice(i, 1)[0]);
+  renderStrip();
+});
 function resetForm(keepBrand) {
   const marca = keepBrand ? $("#fMarca").value : "";
-  editing = null; photoBlob = null; removePhoto = false;
+  editing = null; photos = [];
   $("#pform").reset(); $("#fDisp").checked = true; $("#fFoto").value = "";
   $("#fMarca").value = marca; setSizes([]);
   $("#fCodigo").value = nextCode();
-  setPreview(""); $("#fErr").textContent = "";
+  renderStrip(); $("#fErr").textContent = "";
   $("#fTitle").textContent = "Subir camisa"; $("#fBtn").textContent = "Subir camisa"; $("#fCancel").hidden = true;
   renderBrandChips(); checkCodeHint();
 }
 function startEdit(r) {
-  editing = r; photoBlob = null; removePhoto = false;
+  editing = r; photos = rowPhotos(r);
   $("#fCodigo").value = r.codigo || ""; $("#fMarca").value = r.marca; setSizes(r.tallas || []);
   $("#fPrecio").value = r.precio; $("#fDisp").checked = !!r.disponible;
-  setPreview(r.foto_url || ""); $("#fErr").textContent = "";
+  renderStrip(); $("#fErr").textContent = "";
   $("#fTitle").textContent = "Editar camisa"; $("#fBtn").textContent = "Guardar cambios"; $("#fCancel").hidden = false;
   renderBrandChips(); checkCodeHint();
   $("#pform").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -228,21 +246,27 @@ async function resizeImage(file, max) {
   ctx.drawImage(src, 0, 0, cv.width, cv.height);
   return new Promise(res => cv.toBlob(res, "image/jpeg", 0.82));
 }
-async function takeFile(file) {
-  if (!file) return;
-  if (!/^image\//.test(file.type)) { $("#fErr").textContent = "Elige un archivo de imagen."; return; }
+async function takeFiles(files) {
+  const list = [...(files || [])];
+  if (!list.length) return;
   $("#fErr").textContent = "";
-  try {
-    photoBlob = await resizeImage(file, 1000); removePhoto = false;
-    setPreview(URL.createObjectURL(photoBlob));
-  } catch (e) { photoBlob = null; $("#fErr").textContent = "No se pudo leer esa foto. Prueba con otra."; }
+  let skipped = 0;
+  for (const f of list) {
+    if (photos.length >= MAX_PHOTOS) { skipped++; continue; }
+    if (!/^image\//.test(f.type)) { skipped++; continue; }
+    try {
+      const blob = await resizeImage(f, 1000);
+      photos.push({ blob, url: URL.createObjectURL(blob) });
+    } catch (e) { skipped++; }
+  }
+  renderStrip();
+  if (skipped) $("#fErr").textContent = skipped + " archivo(s) no se agregaron (máximo " + MAX_PHOTOS + " fotos o formato no válido).";
 }
-$("#fFoto").addEventListener("change", e => takeFile(e.target.files[0]));
+$("#fFoto").addEventListener("change", e => { takeFiles(e.target.files).then(() => { e.target.value = ""; }); });
 const drop = $("#drop");
 ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
-drop.addEventListener("drop", e => takeFile(e.dataTransfer && e.dataTransfer.files[0]));
-$("#rmPhoto").onclick = () => { photoBlob = null; removePhoto = true; $("#fFoto").value = ""; setPreview(""); };
+drop.addEventListener("drop", e => takeFiles(e.dataTransfer && e.dataTransfer.files));
 
 $("#pform").addEventListener("submit", async e => {
   e.preventDefault();
@@ -261,20 +285,25 @@ $("#pform").addEventListener("submit", async e => {
   const btn = $("#fBtn"), label = btn.textContent, wasEditing = !!editing;
   btn.disabled = true; btn.textContent = "Guardando…";
   try {
-    let foto_url = editing ? editing.foto_url : null, foto_path = editing ? editing.foto_path : null, oldPath = null;
-    if (photoBlob) {
+    const before = editing ? rowPhotos(editing) : [];
+    const keepPaths = new Set(photos.filter(p => !p.blob).map(p => p.path));
+    const uploaded = [];
+    const final = [];
+    for (const p of photos) {
+      if (!p.blob) { final.push({ url: p.url, path: p.path }); continue; }
       const path = Date.now() + "-" + Math.random().toString(36).slice(2, 8) + ".jpg";
-      const up = await sb.storage.from(BUCKET).upload(path, photoBlob, { contentType: "image/jpeg", cacheControl: "31536000" });
-      if (up.error) throw up.error;
-      oldPath = editing && editing.foto_path;
-      foto_url = sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl; foto_path = path;
-    } else if (removePhoto) {
-      oldPath = editing && editing.foto_path; foto_url = null; foto_path = null;
+      const up = await sb.storage.from(BUCKET).upload(path, p.blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+      if (up.error) { if (uploaded.length) await sb.storage.from(BUCKET).remove(uploaded); throw up.error; }
+      uploaded.push(path);
+      final.push({ url: sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl, path });
     }
-    const body = { codigo, marca, tallas, precio, disponible, foto_url, foto_path };
+    const oldPaths = before.map(p => p.path).filter(pa => pa && !keepPaths.has(pa));
+    const body = { codigo, marca, tallas, precio, disponible,
+      foto_url: final[0] ? final[0].url : null, foto_path: final[0] ? final[0].path : null,
+      fotos: final.map(p => p.url), fotos_paths: final.map(p => p.path) };
     const res = editing ? await sb.from("productos").update(body).eq("id", editing.id) : await sb.from("productos").insert(body);
-    if (res.error) throw res.error;
-    if (oldPath) await sb.storage.from(BUCKET).remove([oldPath]);
+    if (res.error) { if (uploaded.length) await sb.storage.from(BUCKET).remove(uploaded); throw res.error; }
+    if (oldPaths.length) await sb.storage.from(BUCKET).remove(oldPaths);
     toast(wasEditing ? "Cambios guardados." : codigo + " subida a la tienda.");
     await loadRows();
     $("#fMarca").value = marca;  // deja escrita la marca tal como quedó guardada

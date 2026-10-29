@@ -70,13 +70,12 @@
         <input id="fPrecio" type="number" inputmode="decimal" min="0" step="0.01" placeholder="77">
       </div>
 
-      <div class="field"><span class="lab">Foto</span>
+      <div class="field"><span class="lab">Fotos (hasta 6)</span>
+        <div class="gstrip" id="gstrip"></div>
         <label class="drop" id="drop" for="fFoto">
-          <img id="prev" alt="" hidden>
-          <span id="dropTxt">Toca para elegir una foto o arrástrala aquí.<small>Mejor vertical. Se reduce sola para cargar rápido.</small></span>
+          <span id="dropTxt">Toca para elegir una o varias fotos o arrástralas aquí.<small>La primera es la principal. Mejor verticales. Se reducen solas.</small></span>
         </label>
-        <input id="fFoto" type="file" accept="image/*" hidden>
-        <button type="button" class="link" id="rmPhoto" hidden>Quitar foto</button>
+        <input id="fFoto" type="file" accept="image/*" multiple hidden>
       </div>
 
       <label class="sw"><input type="checkbox" id="fDisp" checked><span class="knob"></span>Disponible</label>

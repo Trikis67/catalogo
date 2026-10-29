@@ -18,8 +18,12 @@ window.CATALOGO = {
   whatsapp: "50255940361",
   whatsappLabel: "+502 5594 0361",
 
+  /* Redes sociales (se muestran en "Redes") */
+  tiktok: "https://www.tiktok.com/@playeron12?_r=1&_t=ZS-9ARYRwki83x",
+  facebook: "https://www.facebook.com/share/14po1MjVLiP/",
+
   currency: "Q",
 
   /* Frases que corren en la franja azul (puedes dejar la lista vacía: []) */
-  ticker: ["Pedidos por WhatsApp", "Entrega a domicilio o recoger", "Escríbenos para confirmar existencias"]
+  ticker: ["Pedidos por WhatsApp", "Envíos a domicilio", "Escríbenos para confirmar existencias"]
 };
