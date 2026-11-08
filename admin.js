@@ -28,6 +28,7 @@ function friendly(err) {
   const m = (err && err.message) || String(err);
   const code = err && err.code;
   if (code === "23505" || /duplicate key|unique/i.test(m)) return "Ese código ya existe. Usa otro, por ejemplo " + nextCode() + ".";
+  if (/column .*(precio_antes).* does not exist|could not find the .*(precio_antes)/i.test(m)) return "Falta ejecutar migracion_ofertas.sql en Supabase (SQL Editor) para usar ofertas.";
   if (/column .*(tipo).* does not exist|could not find the .*(tipo)/i.test(m)) return "Falta ejecutar migracion_gorras.sql en Supabase (SQL Editor).";
   if (/column .*(fotos).* does not exist|could not find the .*(fotos)/i.test(m)) return "Falta ejecutar migracion_fotos.sql en Supabase (SQL Editor).";
   if (/column .*(codigo|tallas).* does not exist|could not find the .*(codigo|tallas)/i.test(m)) return "Falta ejecutar migracion.sql en Supabase (SQL Editor).";
@@ -39,6 +40,9 @@ function friendly(err) {
 $("#brand").textContent = C.brand || "Catálogo";
 document.title = "Panel · " + (C.brand || "Catálogo");
 $("#precioLab").textContent = "Precio (" + currency + ")";
+$("#antesLab").textContent = "Precio anterior (" + currency + ", opcional, para oferta)";
+/* La columna precio_antes existe solo después de correr migracion_ofertas.sql */
+const hasAntes = () => rows.some(r => Object.prototype.hasOwnProperty.call(r, "precio_antes"));
 $("#tallaChips").innerHTML = SIZES.map(s => '<label><input type="checkbox" value="' + s + '"><span>' + s + "</span></label>").join("");
 
 function setView(v) {
@@ -164,7 +168,7 @@ function renderList() {
     html += '<div class="row" style="animation-delay:' + Math.min(i++, 10) * 40 + 'ms">'
       + '<div class="th">' + (rowPhotos(r)[0] ? '<img src="' + esc(rowPhotos(r)[0].url) + '" alt="" loading="lazy">' : "Sin foto") + (rowPhotos(r).length > 1 ? '<b class="nf">' + rowPhotos(r).length + "</b>" : "") + "</div>"
       + '<div class="i"><span class="code">' + esc(r.codigo || "") + "</span><b>" + esc(r.marca) + "</b>"
-      + '<div class="sz">' + (r.tipo === "gorra" ? "<i>Gorra</i>" : tallas.map(t => "<i>" + esc(t) + "</i>").join("")) + "<em>" + money(r.precio) + "</em></div></div>"
+      + '<div class="sz">' + (r.tipo === "gorra" ? "<i>Gorra</i>" : tallas.map(t => "<i>" + esc(t) + "</i>").join("")) + (Number(r.precio_antes) > Number(r.precio) ? "<s>" + money(r.precio_antes) + "</s>" : "") + "<em>" + money(r.precio) + "</em></div></div>"
       + '<div class="ops">'
       + '<button type="button" class="op ' + (r.disponible ? "on" : "off") + '" data-act="toggle" data-id="' + r.id + '">' + (r.disponible ? "Disponible" : "Agotado") + "</button>"
       + '<button type="button" class="op" data-act="edit" data-id="' + r.id + '">Editar</button>'
@@ -207,8 +211,8 @@ $("#list").addEventListener("click", async e => {
 function renderStrip() {
   $("#gstrip").innerHTML = photos.map((p, i) =>
     '<div class="gi"><img src="' + esc(p.url) + '" alt="">' + (i === 0 ? '<span class="main">Principal</span>' : "")
-    + '<div class="go">' + (i > 0 ? '<button type="button" data-a="first" data-i="' + i + '" title="Hacer principal">★</button>' : "")
-    + '<button type="button" data-a="rm" data-i="' + i + '" title="Quitar">×</button></div></div>').join("");
+    + '<div class="go">' + (i > 0 ? '<button type="button" data-a="first" data-i="' + i + '" title="Hacer principal" aria-label="Hacer principal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></button>' : "")
+    + '<button type="button" data-a="rm" data-i="' + i + '" title="Quitar" aria-label="Quitar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>').join("");
   $("#drop").hidden = photos.length >= MAX_PHOTOS;
 }
 $("#gstrip").addEventListener("click", e => {
@@ -232,6 +236,7 @@ function startEdit(r) {
   editing = r; photos = rowPhotos(r);
   $("#fCodigo").value = r.codigo || ""; $("#fMarca").value = r.marca; setSizes(r.tallas || []); setTipo(r.tipo === "gorra" ? "gorra" : "playera");
   $("#fPrecio").value = r.precio; $("#fDisp").checked = !!r.disponible;
+  $("#fAntes").value = r.precio_antes == null ? "" : r.precio_antes;
   renderStrip(); $("#fErr").textContent = "";
   $("#fTitle").textContent = "Editar producto"; $("#fBtn").textContent = "Guardar cambios"; $("#fCancel").hidden = false;
   renderBrandChips(); checkCodeHint();
@@ -292,6 +297,9 @@ $("#pform").addEventListener("submit", async e => {
   if (!tallas.length) { err.textContent = "Elige al menos una talla."; return; }
   const precio = Number($("#fPrecio").value), disponible = $("#fDisp").checked;
   if (!$("#fPrecio").value || isNaN(precio) || precio < 0) { err.textContent = "Escribe un precio válido."; $("#fPrecio").focus(); return; }
+  const antesTxt = $("#fAntes").value.trim(), antes = antesTxt ? Number(antesTxt) : null;
+  if (antesTxt && (isNaN(antes) || antes <= precio)) { err.textContent = "El precio anterior debe ser mayor que el precio actual (o déjalo vacío)."; $("#fAntes").focus(); return; }
+  if (antesTxt && rows.length && !hasAntes()) { err.textContent = "Para usar ofertas, primero ejecuta migracion_ofertas.sql en Supabase (SQL Editor)."; return; }
 
   const btn = $("#fBtn"), label = btn.textContent, wasEditing = !!editing;
   btn.disabled = true; btn.textContent = "Guardando…";
@@ -312,6 +320,7 @@ $("#pform").addEventListener("submit", async e => {
     const body = { codigo, marca, tipo, tallas, precio, disponible,
       foto_url: final[0] ? final[0].url : null, foto_path: final[0] ? final[0].path : null,
       fotos: final.map(p => p.url), fotos_paths: final.map(p => p.path) };
+    if (hasAntes() || antes != null) body.precio_antes = antes;
     const res = editing ? await sb.from("productos").update(body).eq("id", editing.id) : await sb.from("productos").insert(body);
     if (res.error) { if (uploaded.length) await sb.storage.from(BUCKET).remove(uploaded); throw res.error; }
     if (oldPaths.length) await sb.storage.from(BUCKET).remove(oldPaths);

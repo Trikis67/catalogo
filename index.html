@@ -4,49 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>El Rack de las Playeras</title>
-<meta name="theme-color" content="#2B3CFF">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
-<link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="description" content="Playeras y gorras por talla con envío a domicilio. Elige tu talla, agrega al pedido y confirma por WhatsApp.">
+<link rel="canonical" href="https://elrackdelasplayerasgt.lat/">
+<!-- Vista previa al compartir el enlace (WhatsApp, Facebook, TikTok) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="El Rack de las Playeras">
+<meta property="og:locale" content="es_GT">
+<meta property="og:url" content="https://elrackdelasplayerasgt.lat/">
+<meta property="og:title" content="El Rack de las Playeras · Playeras y gorras por talla">
+<meta property="og:description" content="Elige tu talla, agrega al pedido y confirma por WhatsApp. Envío a domicilio.">
+<meta property="og:image" content="https://elrackdelasplayerasgt.lat/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Playeras y gorras de El Rack de las Playeras">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#FAFAF9">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png?v=2">
+<link rel="shortcut icon" href="favicon.ico?v=2">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=9">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Archivo:wdth,wght@62..125,400..800&display=swap">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 
+<div class="ticker" id="ticker" aria-hidden="true"></div>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#" id="brand"><span id="brandName"></span><small>Catálogo</small></a>
+    <a class="brand" href="#" id="brand"><span id="brandName"></span></a>
     <label class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Buscar marca o código (#12)" autocomplete="off" aria-label="Buscar productos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" placeholder="Buscar marca o código" autocomplete="off" aria-label="Buscar productos">
     </label>
     <div class="tools">
       <a class="soc" id="lnkTiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 2h-3.2v13.3a2.9 2.9 0 1 1-2-2.75V9.3a6.1 6.1 0 1 0 5.2 6V8.6a7.4 7.4 0 0 0 4.3 1.4V6.800a4.300 4.300 0 0 1-4.300-4.800z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 2h-3.2v13.3a2.9 2.9 0 1 1-2-2.75V9.3a6.1 6.1 0 1 0 5.2 6V8.6a7.4 7.4 0 0 0 4.3 1.4V6.8a4.3 4.3 0 0 1-4.3-4.8z"/></svg>
       </a>
       <a class="soc" id="lnkFacebook" href="#" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.500 22v-8.200h2.800l.5-3.400h-3.300V8.300c0-1 .3-1.700 1.700-1.700h1.700V3.600c-.3 0-1.300-.1-2.500-.1-2.500 0-4.200 1.500-4.200 4.300v2.600H7.300v3.400h2.900V22z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8.2h2.8l.5-3.4h-3.3V8.3c0-1 .3-1.7 1.7-1.7h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.6H7.3v3.4h2.9V22z"/></svg>
       </a>
-      <button class="cartbtn" id="cartBtn" type="button" aria-label="Abrir mi pedido"><span>Pedido</span><span class="n" id="cartN">0</span></button>
+      <button class="cartbtn" id="cartBtn" type="button" aria-label="Abrir mi pedido">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" stroke-linecap="round"/></svg>
+        <span class="lbl">Pedido</span><span class="n" id="cartN">0</span>
+      </button>
     </div>
   </div>
 </header>
-<div class="ticker" id="ticker" aria-hidden="true"></div>
 
 <main>
   <div class="wrap">
     <section class="hero">
-      <p class="kicker" id="kicker"></p>
-      <h1 id="hero"></h1>
-      <p class="lead" id="tagline"></p>
+      <div class="hero-t">
+        <h1 id="hero"></h1>
+        <p class="lead" id="tagline"></p>
+      </div>
+      <div class="hero-pics" id="heroPics" aria-label="Productos recientes"></div>
     </section>
 
     <p class="notice" id="notice" hidden>Estás viendo productos de ejemplo. Para mostrar los tuyos, pega tu URL y tu clave de Supabase en config.js.</p>
 
-    <nav class="sizes" id="cats" aria-label="Filtrar por talla"></nav>
+    <div class="filters">
+      <nav class="sizes" id="cats" aria-label="Filtrar por talla"></nav>
+      <nav class="brands" id="brands" aria-label="Filtrar por marca"></nav>
+    </div>
 
     <div class="bar">
       <span class="count" id="count" aria-live="polite"></span>
@@ -54,13 +76,14 @@
         <button type="button" id="avAll" aria-pressed="true">Todos</button>
         <button type="button" id="avYes" aria-pressed="false">Disponibles</button>
       </div>
-      <select class="sel" id="brandSel" aria-label="Filtrar por marca"><option value="">Todas las marcas</option></select>
-      <select class="sel" id="sort" aria-label="Ordenar">
-        <option value="">Agrupado por marca</option>
-        <option value="new">Más recientes</option>
-        <option value="asc">Precio: menor a mayor</option>
-        <option value="desc">Precio: mayor a menor</option>
-      </select>
+      <label class="sortw"><span class="vh">Ordenar</span>
+        <select class="sel" id="sort" aria-label="Ordenar">
+          <option value="">Por marca</option>
+          <option value="new">Más recientes</option>
+          <option value="asc">Precio: menor a mayor</option>
+          <option value="desc">Precio: mayor a menor</option>
+        </select>
+      </label>
     </div>
 
     <div class="grid" id="grid"></div>
@@ -70,18 +93,34 @@
 <section class="contact" id="contacto">
   <div class="wrap">
     <div>
-      <p class="kicker">Contacto</p>
-      <h3>¿Dudas o pedidos? Escríbenos.</h3>
-      <p class="lead">Confirmamos existencias y coordinamos la entrega.</p>
+      <h2>¿Dudas o pedidos? <em>Escríbenos.</em></h2>
+      <p class="lead">Confirmamos existencias y coordinamos la entrega a tu domicilio.</p>
     </div>
     <div class="acts">
       <div class="was" id="was"></div>
     </div>
   </div>
 </section>
-<footer class="foot"><div class="wrap">© <span id="yr"></span> <span id="footBrand"></span></div></footer>
+<footer class="foot"><div class="wrap"><span>© <span id="yr"></span> <span id="footBrand"></span></span><span>Envíos a domicilio · Pedidos por WhatsApp</span></div></footer>
 
-<div class="lb" id="lb" hidden><button type="button" id="lbX" aria-label="Cerrar">×</button><button type="button" id="lbP" class="lbn l" aria-label="Anterior">&#8249;</button><img id="lbImg" alt=""><button type="button" id="lbN" class="lbn r" aria-label="Siguiente">&#8250;</button><span id="lbC" class="lbc"></span></div>
+<div class="lb" id="lb" hidden>
+  <button type="button" id="lbX" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <button type="button" id="lbP" class="lbn l" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <img id="lbImg" alt="">
+  <button type="button" id="lbN" class="lbn r" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+  <span id="lbC" class="lbc"></span>
+</div>
+
+<div class="pd" id="pd" hidden>
+  <div class="pd-bg" id="pdBg"></div>
+  <section class="pd-box" role="dialog" aria-modal="true" aria-labelledby="pdName">
+    <button class="xbtn pd-x" id="pdX" type="button" aria-label="Cerrar producto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="pd-media"><div class="pd-main" id="pdMain"></div><div class="pd-th" id="pdTh"></div></div>
+    <div class="pd-info" id="pdInfo"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="dock" id="dock">
   <button type="button" id="dockBtn" aria-label="Ver mi pedido">
@@ -93,11 +132,11 @@
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Pedido" aria-hidden="true">
   <header>
-    <button class="xbtn" id="backBtn" type="button" aria-label="Volver al paso anterior" hidden>←</button>
+    <button class="xbtn" id="backBtn" type="button" aria-label="Volver al paso anterior" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button>
     <h2 id="dTitle">Tu pedido</h2>
-    <button class="xbtn" id="closeCart" type="button" aria-label="Cerrar pedido">✕</button>
+    <button class="xbtn" id="closeCart" type="button" aria-label="Cerrar pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   </header>
-  <div class="steps" aria-hidden="true"><span class="stp on" id="s1">01 Pedido</span><span class="stp" id="s2">02 Datos</span><span class="stp" id="s3">03 Enviar</span></div>
+  <div class="steps" aria-hidden="true"><span class="stp on" id="s1">1. Pedido</span><span class="stp" id="s2">2. Datos</span><span class="stp" id="s3">3. Enviar</span></div>
 
   <section class="view" id="v-cart">
     <div class="scroll" id="lines"></div>
@@ -115,6 +154,10 @@
           <div class="field" id="gName"><label for="fName">Nombre completo</label><input id="fName" type="text" autocomplete="name" placeholder="Ej. María López"><span class="err" id="eName"></span></div>
           <div class="field"><label for="fPhone">Tu teléfono (opcional)</label><input id="fPhone" type="tel" autocomplete="tel" placeholder="Ej. 5555 1234"></div>
           <p class="envnote"><b>Envío a domicilio.</b> No tenemos tienda física: te lo llevamos. El costo del envío se confirma por WhatsApp.</p>
+          <div class="pair">
+            <div class="field" id="gDep"><label for="fDep">Departamento</label><select id="fDep" autocomplete="address-level1"><option value="">Elige…</option></select><span class="err" id="eDep"></span></div>
+            <div class="field" id="gMun"><label for="fMun">Municipio</label><select id="fMun" autocomplete="address-level2" disabled><option value="">Primero el departamento</option></select><span class="err" id="eMun"></span></div>
+          </div>
           <div class="field" id="addrBox"><label for="fAddr">Dirección de entrega</label><textarea id="fAddr" placeholder="Zona, colonia, calle y una referencia"></textarea><span class="err" id="eAddr"></span></div>
           <div class="field"><label for="fNote">Notas (opcional)</label><textarea id="fNote" placeholder="Horario, otra duda"></textarea></div>
         </div>
@@ -129,7 +172,7 @@
   <section class="view" id="v-send" hidden>
     <div class="scroll">
       <div class="ready">
-        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg></div>
+        <svg class="tick" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="24" r="21"/><path d="M15 24.5l6 6L33 18"/></svg>
         <h3>Listo para enviar</h3>
         <p>Se abrirá WhatsApp con el detalle. Para terminar, envía el mensaje desde ahí.</p>
       </div>
@@ -143,7 +186,8 @@
   </section>
 </aside>
 
-<script src="config.js?v=9"></script>
-<script src="store.js?v=9"></script>
+<script src="config.js?v=11"></script>
+<script src="gt.js?v=11"></script>
+<script src="store.js?v=14"></script>
 </body>
 </html>

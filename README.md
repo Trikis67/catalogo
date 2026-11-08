@@ -21,6 +21,9 @@ Archivos:
 | `migracion.sql` | Si ya habías ejecutado una versión anterior: agrega códigos y varias tallas sin perder nada |
 | `migracion_fotos.sql` | Agrega la opción de varias fotos por camisa (ejecútalo una vez, no lleva tu correo) |
 | `migracion_gorras.sql` | Agrega el apartado de gorras (ejecútalo una vez, no lleva tu correo) |
+| `migracion_ofertas.sql` | Agrega el precio anterior para mostrar ofertas (ejecútalo una vez, no lleva tu correo) |
+| `gt.js` | Departamentos y municipios de Guatemala para el formulario del pedido |
+| `og.jpg` | La imagen que aparece al compartir el enlace de la tienda en WhatsApp, Facebook o TikTok |
 | `favicon.svg`, `apple-touch-icon.png` | El ícono de la pestaña del navegador y de la pantalla de inicio del celular |
 
 Mientras no conectes Supabase, la tienda muestra productos de ejemplo.
@@ -83,6 +86,13 @@ Consejos para las fotos: mejor verticales (como 4 por 5) y con buena luz. El pan
 
 ---
 
+## Ofertas, novedades, guía de tallas y enlaces
+
+- **Oferta:** en el panel escribe un *precio anterior* mayor que el precio. La tienda lo muestra tachado con la etiqueta «Oferta −%». Para quitarla, borra ese campo. (Requiere `migracion_ofertas.sql`.)
+- **Nuevo:** los productos disponibles más recientes llevan la etiqueta «Nuevo». Cuántos, se cambia en `nuevos` dentro de `config.js`.
+- **Guía de tallas:** llena `guiaTallas.filas` en `config.js` con tus medidas. Mientras esté vacía no aparece.
+- **Enlace de un producto:** cada producto tiene su enlace, por ejemplo `tu-direccion/?p=015` abre la #015. El botón «Compartir» de la ficha lo copia o lo envía.
+
 ## Cosas que conviene saber
 
 - **Proyecto en pausa.** Un proyecto gratuito de Supabase se pausa si pasa una semana sin actividad. Si la tienda deja de cargar, entra a Supabase y pulsa **Restore project**. Si tienes visitas o entras al panel seguido no suele pasar.
@@ -100,6 +110,7 @@ Consejos para las fotos: mejor verticales (como 4 por 5) y con buena luz. El pan
 | El panel dice "Correo o contraseña incorrectos" | El usuario se creó en **Authentication → Users**; revisa el correo y la contraseña |
 | "No tienes permiso" al subir | El correo con el que entras no es el que pusiste en `setup.sql`. Corrígelo y vuelve a ejecutar el archivo |
 | La foto no se sube | Ejecuta `setup.sql` completo otra vez; crea la carpeta `productos` y sus permisos |
+| El panel dice "Falta ejecutar migracion_ofertas.sql" | Ejecuta `migracion_ofertas.sql` en SQL Editor |
 | El panel dice "Falta ejecutar migracion_gorras.sql" | Ejecuta `migracion_gorras.sql` en SQL Editor |
 | El panel dice "Falta ejecutar migracion_fotos.sql" | Ejecuta `migracion_fotos.sql` en SQL Editor |
 | El panel dice "Falta ejecutar migracion.sql" | La tabla aún no tiene códigos ni tallas múltiples: ejecuta `migracion.sql` en SQL Editor |

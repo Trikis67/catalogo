@@ -31,6 +31,21 @@ window.CATALOGO = {
 
   currency: "Q",
 
+  /* Cuántos productos recientes llevan la etiqueta "Nuevo" (0 = ninguno) */
+  nuevos: 6,
+
+  /* Guía de tallas: aparece en la ficha de cada playera.
+     Mide una playera de cada talla acostada: ancho de axila a axila y largo
+     desde el hombro hasta abajo. Escribe tus medidas en "filas", por ejemplo:
+       ["S", "48", "68"],
+     Mientras "filas" esté vacía, la guía no se muestra. */
+  guiaTallas: {
+    columnas: ["Talla", "Ancho (cm)", "Largo (cm)"],
+    filas: [
+    ],
+    nota: "Medidas aproximadas, tomadas con la playera acostada."
+  },
+
   /* Frases que corren en la franja azul (puedes dejar la lista vacía: []) */
   ticker: ["Pedidos por WhatsApp", "Envíos a domicilio", "Escríbenos para confirmar existencias"]
 };
