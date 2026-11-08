@@ -41,18 +41,15 @@ svg{display:block}
 .brand{text-decoration:none;font-family:var(--f-display);font-weight:600;font-size:24px;line-height:1;letter-spacing:.01em;white-space:nowrap}
 .search{justify-self:center;width:min(420px,100%);position:relative}
 .search input{width:100%;height:42px;border:1px solid var(--hair);border-radius:999px;background:var(--surface);padding:0 16px 0 42px;font-size:14px;transition:border-color .2s}
-.search input:hover{border-color:var(--hair-2)}
 .search input:focus{outline:none;border-color:var(--ink)}
 .search input::placeholder{color:var(--mute)}
 .search svg{position:absolute;left:15px;top:50%;translate:0 -50%;width:18px;height:18px;color:var(--mute);pointer-events:none}
 .tools{display:flex;align-items:center;gap:4px}
 .soc{width:42px;height:42px;display:grid;place-items:center;border-radius:999px;color:var(--ink);transition:background .2s}
 .soc svg{width:19px;height:19px}
-.soc:hover{background:var(--tile)}
 .cartbtn{height:42px;display:flex;align-items:center;gap:8px;margin-left:6px;padding:0 16px 0 14px;border:0;border-radius:999px;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;letter-spacing:.02em;transition:background .2s,transform 160ms var(--ease)}
 .cartbtn svg{width:19px;height:19px}
 .cartbtn .n{min-width:20px;height:20px;padding:0 6px;display:grid;place-items:center;border-radius:999px;background:var(--paper);color:var(--ink);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
-.cartbtn:hover{background:var(--ink-2)}
 .cartbtn:active{transform:scale(.97)}
 .n.pop{animation:pop .4s var(--ease)}
 @keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
@@ -81,7 +78,6 @@ svg{display:block}
 .size sup{font-family:var(--f-body);font-weight:600;font-size:11px;letter-spacing:0;line-height:1.6;font-variant-numeric:tabular-nums}
 .size small{display:none}
 .size::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
-.size:hover{color:var(--ink)}
 .size[aria-pressed="true"]{color:var(--ink)}
 .size[aria-pressed="true"]::after{transform:scaleX(1)}
 .brands{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
@@ -89,7 +85,6 @@ svg{display:block}
 .brands:empty{display:none}
 .bch{flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 15px;border:1px solid var(--hair-2);border-radius:999px;background:transparent;color:var(--ink);font-size:13px;font-weight:500;white-space:nowrap;transition:background .2s,border-color .2s,color .2s,transform 160ms var(--ease)}
 .bch sup{font-size:11px;color:var(--mute);top:0;font-variant-numeric:tabular-nums}
-.bch:hover{border-color:var(--ink)}
 .bch:active{transform:scale(.97)}
 .bch[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .bch[aria-pressed="true"] sup{color:var(--paper);opacity:.7}
@@ -99,10 +94,8 @@ svg{display:block}
 .count{margin-right:auto;font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
 .tabs{display:flex;gap:4px;padding:3px;border:1px solid var(--hair);border-radius:999px;background:var(--surface)}
 .tabs button{border:0;border-radius:999px;background:none;height:30px;padding:0 14px;font-size:13px;font-weight:500;color:var(--mute);transition:background .2s,color .2s}
-.tabs button:hover{color:var(--ink)}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .sel{height:38px;border:1px solid var(--hair);border-radius:999px;background:var(--surface);padding:0 34px 0 14px;font-size:13px;font-weight:500;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23151413%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6 9l6 6 6-6%22/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
-.sel:hover{border-color:var(--hair-2)}
 
 /* Catálogo */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:44px 24px;padding:20px 0 140px}
@@ -140,11 +133,9 @@ svg{display:block}
 .info{flex:1;display:grid;gap:6px;align-content:start}
 .nm{margin:0;font-family:var(--f-display);font-weight:600;font-size:21px;line-height:1.1;letter-spacing:.01em;text-transform:uppercase;overflow-wrap:anywhere}
 .nm a{text-decoration:none;background:linear-gradient(currentColor,currentColor) 0 100%/0 1px no-repeat;transition:background-size .3s var(--ease)}
-.nm a:hover{background-size:100% 1px}
 .meta{display:flex;gap:8px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
 .sz{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .szb{min-width:36px;height:32px;padding:0 9px;border:1px solid var(--hair-2);border-radius:var(--r);background:var(--surface);color:var(--ink);font-size:12px;font-weight:600;transition:background .2s,color .2s,border-color .2s,transform 160ms var(--ease)}
-.szb:hover{border-color:var(--ink)}
 .szb:active{transform:scale(.95)}
 .szb[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .szb[disabled]{color:var(--hair-2);border-color:var(--hair);background:transparent;cursor:not-allowed;text-decoration:line-through}
@@ -154,25 +145,19 @@ svg{display:block}
 .price .was,.pd-price .was{font-size:13px;font-weight:400;color:var(--mute)}
 .price.sale span,.pd-price.sale span{color:var(--sale)}
 .add{height:38px;padding:0 16px;border:1px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:background .2s,color .2s,transform 160ms var(--ease)}
-.add:hover{background:var(--ink-2)}
 .add:active{transform:scale(.97)}
 .add.done{background:var(--ok);border-color:var(--ok)}
 a.add{display:inline-grid;place-items:center;text-decoration:none}
 .add.notify{background:transparent;color:var(--ink)}
-.add.notify:hover{background:var(--ink);color:var(--paper)}
 .empty{grid-column:1/-1;text-align:center;padding:64px 16px;border:1px dashed var(--hair-2);border-radius:var(--r);font-size:14px;line-height:1.7;color:var(--mute)}
 .empty button{margin-top:14px;height:40px;padding:0 18px;border:1px solid var(--ink);border-radius:var(--r);background:transparent;color:var(--ink);font-size:13px;font-weight:600}
-.empty button:hover{background:var(--ink);color:var(--paper)}
 .skel{aspect-ratio:4/5;border-radius:var(--r);background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 120%22%3E%3Cpath d=%22M42 10 L18 24 L6 48 L26 56 L32 46 L32 108 L88 108 L88 46 L94 56 L114 48 L102 24 L78 10 C74 22 46 22 42 10 Z%22 fill=%22%23E2E1DE%22/%3E%3C/svg%3E") center/40% no-repeat,var(--tile)}
 
 /* Botones */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 22px;border:1px solid var(--ink);border-radius:var(--r);background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;transition:background .2s,color .2s,border-color .2s,transform 160ms var(--ease)}
-.btn:hover{background:var(--ink-2)}
 .btn:active{transform:scale(.98)}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--hair-2)}
-.btn.ghost:hover{border-color:var(--ink);background:var(--surface)}
 .btn.blue{background:var(--wa);border-color:var(--wa);color:#fff}
-.btn.blue:hover{background:#18653C;border-color:#18653C}
 .btn[aria-disabled="true"],.btn[disabled]{opacity:.35;pointer-events:none}
 
 /* Contacto y pie */
@@ -186,7 +171,6 @@ a.add{display:inline-grid;place-items:center;text-decoration:none}
 .wa{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid var(--hair-2);border-radius:var(--r);background:var(--paper);text-decoration:none;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;transition:border-color .2s,background .2s,transform 160ms var(--ease)}
 .wa svg{width:26px;height:26px;flex:none;color:var(--wa)}
 .wa small{display:block;font-size:12px;font-weight:500;color:var(--mute)}
-.wa:hover{border-color:var(--ink);background:var(--surface)}
 .wa:active{transform:scale(.99)}
 .foot{border-top:1px solid var(--hair);padding-block:20px calc(20px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--mute)}
 .foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}
@@ -210,7 +194,6 @@ a.add{display:inline-grid;place-items:center;text-decoration:none}
 .drawer>header h2{margin:0 auto 0 0;font-family:var(--f-display);font-weight:500;font-size:30px;line-height:1;letter-spacing:-.01em}
 .xbtn{width:40px;height:40px;display:grid;place-items:center;padding:0;border:0;border-radius:999px;background:transparent;color:var(--ink);transition:background .2s,transform 160ms var(--ease)}
 .xbtn svg{width:20px;height:20px}
-.xbtn:hover{background:var(--tile)}
 .xbtn:active{transform:scale(.94)}
 .steps{display:flex;gap:6px;padding:0 18px 14px;border-bottom:1px solid var(--hair);font-size:12px;font-weight:600}
 .stp{flex:1;padding-top:8px;border-top:2px solid var(--hair);color:var(--mute);transition:border-color .3s,color .3s}
@@ -226,7 +209,6 @@ a.add{display:inline-grid;place-items:center;text-decoration:none}
 .line .t span{display:block;margin-top:2px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
 .qty{display:inline-flex;align-items:center;margin-top:10px;border:1px solid var(--hair-2);border-radius:999px}
 .qty button{width:32px;height:30px;display:grid;place-items:center;padding:0;border:0;border-radius:999px;background:none;transition:background .2s}
-.qty button:hover{background:var(--tile)}
 .qty svg{width:14px;height:14px}
 .qty output{min-width:26px;text-align:center;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
 .line .sub{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;padding-top:2px}
@@ -236,7 +218,6 @@ a.add{display:inline-grid;place-items:center;text-decoration:none}
 .total b{font-size:26px;font-weight:600;letter-spacing:-.01em;color:var(--ink);text-transform:none;font-variant-numeric:tabular-nums}
 .foot2 .btn{width:100%}
 .link{justify-self:center;border:0;background:none;padding:6px;color:var(--mute);text-decoration:underline;font-size:13px}
-.link:hover{color:var(--ink)}
 
 /* Formulario */
 .form{display:grid;gap:20px;padding:14px 0 8px}
@@ -246,7 +227,6 @@ a.add{display:inline-grid;place-items:center;text-decoration:none}
 .field textarea{min-height:84px;resize:vertical}
 .field select{-webkit-appearance:none;appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23151413%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6 9l6 6 6-6%22/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
 .field input::placeholder,.field textarea::placeholder{color:#8C867C}
-.field input:hover,.field textarea:hover,.field select:hover{border-color:var(--mute)}
 .field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(21,20,19,.08)}
 .field select:disabled{color:var(--mute);background-color:var(--paper);border-color:var(--hair)}
 .field .err{color:var(--sale);font-size:12px}
@@ -298,7 +278,6 @@ body.lock{overflow:hidden}
 .pd-th{display:flex;gap:8px;padding:10px;overflow-x:auto;scrollbar-width:thin}
 .pd-th:empty{display:none}
 .pd-th button{flex:none;width:56px;height:68px;padding:0;border:1px solid transparent;border-radius:var(--r);background:var(--paper);overflow:hidden;opacity:.6;transition:opacity .2s,border-color .2s}
-.pd-th button:hover{opacity:1}
 .pd-th button[aria-pressed="true"]{opacity:1;border-color:var(--ink)}
 .pd-th img{width:100%;height:100%;object-fit:cover}
 .pd-info{padding:36px 32px 28px;display:grid;gap:14px;align-content:start;min-width:0}
@@ -372,10 +351,224 @@ body:has(.drawer.on) .toast,body.lock .toast{bottom:auto;top:calc(16px + env(saf
   .dock .l small{display:none}
 }
 @media (max-width:380px){.pair{grid-template-columns:1fr}}
+/* Reducir movimiento: sin desplazamientos ni escalas, pero se conservan los fundidos y
+   cambios de color que confirman una acción (ver el bloque v19 al final) */
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  *,*::before,*::after{animation-delay:0ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
 
 /* Elegir foto (modelo) en la ficha */
 .pd-pick{display:grid;gap:6px;padding-top:2px;font-size:13px;color:var(--ink-2)}
 .pd-th button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
+
+/* ===== v15: celular nativo (mobile-native) y pulido ===== */
+/* Los efectos al pasar el mouse solo con mouse: en el teléfono quedaban "pegados" tras tocar */
+@media (hover:hover) and (pointer:fine){
+  .search input:hover{border-color:var(--hair-2)}
+  .soc:hover{background:var(--tile)}
+  .cartbtn:hover{background:var(--ink-2)}
+  .size:hover{color:var(--ink)}
+  .bch:hover{border-color:var(--ink)}
+  .tabs button:hover{color:var(--ink)}
+  .sel:hover{border-color:var(--hair-2)}
+  .nm a:hover{background-size:100% 1px}
+  .szb:hover{border-color:var(--ink)}
+  .add:hover{background:var(--ink-2)}
+  .add.notify:hover{background:var(--ink);color:var(--paper)}
+  .empty button:hover{background:var(--ink);color:var(--paper)}
+  .btn:hover{background:var(--ink-2)}
+  .btn.ghost:hover{border-color:var(--ink);background:var(--surface)}
+  .btn.blue:hover{background:#18653C;border-color:#18653C}
+  .wa:hover{border-color:var(--ink);background:var(--surface)}
+  .xbtn:hover{background:var(--tile)}
+  .qty button:hover{background:var(--tile)}
+  .link:hover{color:var(--ink)}
+  .field input:hover,.field textarea:hover,.field select:hover{border-color:var(--mute)}
+  .pd-th button:hover{opacity:1}
+}
+/* Toques sin demora y sin seleccionar el texto de los controles */
+button,a.btn,a.add,a.wa,.soc,.bch,.hp,.szb,.size{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* Desplazar el pedido, la ficha o un carrusel no mueve la página de fondo */
+.scroll,.pd-box,.pic .gal,.pd-th,.brands,.sizes{overscroll-behavior:contain}
+html{-webkit-text-size-adjust:100%}
+/* El iPhone hace zoom en campos con letra menor a 16px */
+@media (pointer:coarse){.search input,.sel{font-size:16px}}
+/* Ficha en celular: el botón para agregar queda siempre a mano, fijo abajo */
+@media (max-width:760px){
+  #pdAdd,.pd-info>a.btn.blue{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:2;box-shadow:0 8px 24px rgba(21,20,19,.22)}
+}
+/* Los estados ganan sobre el efecto del mouse */
+.buy .add.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.sz .szb[disabled]{border-color:var(--hair);background:transparent}
+.bar .tabs button[aria-pressed="true"]{color:var(--paper)}
+/* Categorías (Playeras / Gorras) con sus marcas adentro */
+.grp h3{margin:0;font-family:var(--f-display);font-weight:600;text-transform:uppercase;font-size:clamp(26px,3vw,38px);line-height:1;letter-spacing:-.01em;overflow-wrap:anywhere}
+.cat{grid-column:1/-1;display:flex;align-items:baseline;gap:16px;margin-top:36px;padding-top:28px;border-top:2px solid var(--ink)}
+.cat:first-child{margin-top:0;padding-top:4px;border-top:0}
+.cat h2{margin:0;font-family:var(--f-display);font-weight:500;font-size:clamp(44px,6vw,80px);line-height:.95;letter-spacing:-.02em}
+.cat span{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.cat+.grp{padding-top:8px;border-top:0}
+@media (max-width:640px){.grp h3{font-size:26px}.cat h2{font-size:40px}.cat{margin-top:24px;padding-top:20px}}
+/* Animaciones (v17) */
+.pd-main{position:relative}
+.pd-main img.photo.swap{position:absolute;inset:0}
+.fly.over{z-index:95}
+.top{border-bottom-color:transparent;transition:border-color .2s,box-shadow .25s}
+.top.scrolled{border-bottom-color:var(--hair);box-shadow:0 8px 24px -16px rgba(21,20,19,.35)}
+/* Pulido v18 (impeccable + Emil) */
+/* Jerarquía con pasos claros: portada 92 > categoría 52 > marca 30 > producto 21 */
+.cat h2{font-size:clamp(38px,4.2vw,56px)}
+.grp h3{font-size:clamp(22px,2.4vw,30px)}
+.cat{margin-top:48px}
+/* Talla elegida con contorno: el único bloque negro de la tarjeta es Agregar */
+.card .szb[aria-pressed="true"]{background:var(--surface);color:var(--ink);border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.szb:active{transform:scale(.97)}
+.uni{padding-top:6px}
+@media (max-width:640px){.cat h2{font-size:34px}.grp h3{font-size:22px}}
+
+/* ===== v19: tipografía y movimiento (impeccable typeset/animate + Emil) =====
+   Papeles: Display = Bodoni (portada, categorías, títulos de panel y ficha);
+   Marca = Bodoni mayúscula espaciada; Texto = Archivo 16px; Etiqueta = Archivo angosta en mayúscula;
+   Datos = Archivo con cifras tabulares (precios, conteos, códigos). */
+body{font-size:16px;line-height:1.55;font-kerning:normal;text-rendering:optimizeLegibility}
+h1,h2,h3,.cat h2,.grp h3,.pd-info h2,.contact h2,.ready h3{text-wrap:balance}
+p,.lead,.envnote,.ready p{text-wrap:pretty}
+
+/* Marca: Bodoni en mayúscula necesita aire entre letras para no verse apretada */
+.nm,.grp h3,.line .t b,.pd-info h2,.hp span{letter-spacing:.035em}
+.nm{font-size:20px}
+
+/* Etiquetas: Archivo un poco angosta (eje de ancho ya cargado) y espaciada, como una etiqueta de ropa */
+.add,.btn,.lab,.total,.dock .go,.tabs button,.stp,.st.off,.ticker span,.field label{font-stretch:90%}
+.add,.btn,.dock .go{letter-spacing:.09em}
+.ticker span{letter-spacing:.1em;text-transform:uppercase;font-size:11px;font-weight:600}
+.lab,.field label{letter-spacing:.08em;text-transform:uppercase;font-size:11.5px}
+.tabs button{letter-spacing:.02em}
+
+/* Datos: cifras parejas para que los precios y conteos no "bailen" */
+.price,.pd-price,.total b,.dock .l b,.line .sub,.meta,.pd-code,.count,.grp span,.cat span,sup,.qty output{font-variant-numeric:tabular-nums lining-nums}
+.price{letter-spacing:-.005em}
+
+/* ---- Movimiento ---- */
+/* Momento propio: las fotos de la portada se revelan de abajo hacia arriba, como un lookbook */
+.hp{animation:none}
+.hp img{animation:reveal .9s cubic-bezier(.16,1,.3,1) both}
+.hp:nth-child(2) img{animation-delay:.07s}.hp:nth-child(3) img{animation-delay:.14s}.hp:nth-child(4) img{animation-delay:.21s}
+.hp span{animation:fadeIn .6s .35s ease-out both}
+@keyframes reveal{from{clip-path:inset(100% 0 0 0);transform:scale(1.06)}to{clip-path:inset(0 0 0 0);transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* Continuidad: el indicador de "Todos / Disponibles" se desliza a la opción elegida */
+.tabs{position:relative}
+.tabs button{position:relative;z-index:1}
+.tabs button[aria-pressed="true"]{background:transparent}
+.bar .tabs button[aria-pressed="true"]{color:var(--paper)}
+.tind{position:absolute;left:0;top:3px;bottom:3px;border-radius:999px;background:var(--ink);transition:transform .32s cubic-bezier(.16,1,.3,1),width .32s cubic-bezier(.16,1,.3,1),opacity .2s;pointer-events:none}
+
+/* Continuidad: la línea bajo la talla se desliza de la talla anterior a la nueva */
+.sizes{position:relative}
+.size::after{display:none}
+.sind{position:absolute;left:0;bottom:0;height:2px;background:var(--ink);transition:transform .38s cubic-bezier(.16,1,.3,1),width .38s cubic-bezier(.16,1,.3,1),opacity .2s;pointer-events:none}
+
+/* Confirmación: palomita en el botón, sin cambiar su ancho */
+.add{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.add .ok{width:15px;height:15px;flex:none}
+.add.done .ok path{stroke-dasharray:22;stroke-dashoffset:22;animation:draw .32s .05s cubic-bezier(.16,1,.3,1) forwards}
+.add.done span{animation:fadeIn .18s ease-out both}
+
+/* Pedido: al abrirlo, las prendas entran escalonadas (máximo 7 × 35 ms) */
+.intro .line{animation:lineIn .36s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--n,0) * 35ms + 80ms)}
+@keyframes lineIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Reducir movimiento: se quitan desplazamientos, revelados y escalas; quedan los fundidos */
+@media (prefers-reduced-motion:reduce){
+  .hero h1,.lead,.hp img,.pd-box,.view,.intro .line{animation-name:fadeIn!important;animation-duration:.2s!important}
+  .tind,.sind{transition:opacity .2s!important}
+  .add:active,.btn:active,.szb:active,.bch:active,.cartbtn:active,.dock button:active,.xbtn:active{transform:none!important}
+  .pic img.photo,.pic svg.shirt{transition:opacity .3s!important}
+  .dock{transition:opacity .2s!important}
+  .drawer{transition:translate .01ms!important}
+}
+/* Ancho fijo para "Agregar" y "Agregado": el botón no salta */
+.buy .add{min-width:136px}
+@media (max-width:640px){.buy .add{min-width:0}}
+/* Sin el indicador (si el script no corre), la pestaña elegida conserva su fondo oscuro */
+.tabs:not(.has-ind) button[aria-pressed="true"]{background:var(--ink)}
+
+/* ===== v22: teléfono primero =====
+   Objetivo: que la primera pantalla del teléfono ya muestre fotos de producto,
+   botones cómodos para el pulgar y gestos de app (cabecera que se esconde, hoja que se desliza). */
+.top{transition:top .3s cubic-bezier(.32,.72,0,1),border-color .2s,box-shadow .25s}
+.pd-grab{display:none}
+@media (max-width:640px){
+  /* Franja de avisos en una sola línea */
+  .ticker .track{flex-wrap:nowrap;justify-content:center;gap:0 16px;padding:5px 12px}
+  .ticker span{font-size:10px;letter-spacing:.08em}
+  .ticker span:nth-child(n+3){display:none}
+
+  /* Cabecera compacta; al bajar se esconde y al subir reaparece (ver JS) */
+  .top .wrap{padding-block:8px;gap:8px}
+  .brand{font-size:19px;white-space:nowrap}
+  .search input{height:38px}
+  body.hide-top .top{top:calc(-1 * var(--top-h, 110px))}
+
+  /* Portada breve: lo importante son los productos */
+  .hero{padding-block:16px 12px;gap:6px}
+  .hero h1{font-size:34px;line-height:1}
+  .lead{font-size:14px;line-height:1.45}
+
+  /* Filtros más compactos */
+  .filters{gap:10px;padding-top:2px}
+  .sizes{gap:2px 20px;padding-top:10px}
+  .size{font-size:26px;padding-bottom:8px}
+  .bch{height:34px;padding:0 13px}
+  .bar{padding-block:12px 0;gap:8px 10px}
+  .count{font-size:12px}
+
+  /* Encabezados de sección más cortos */
+  .grid{padding-top:6px;gap:28px 12px}
+  .cat{margin-top:22px;padding-top:16px}
+  .cat:first-child{padding-top:6px}
+  .cat h2{font-size:32px}
+  .grp{padding-top:14px}
+  .cat+.grp{padding-top:2px}
+  .grp h3{font-size:20px}
+
+  /* Pulgar: objetivos de toque más grandes */
+  .szb{min-width:36px;height:36px;font-size:12px}
+  .sz{gap:5px}
+  .add{height:42px;font-size:12px}
+  .nm{font-size:17px}
+
+  /* Hoja de producto con agarradera para deslizar hacia abajo */
+  .pd-grab{display:block;position:absolute;top:8px;left:50%;z-index:4;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.25);pointer-events:none}
+  .pd-box.dragging{transition:none}
+  .pd-box.settle{transition:transform .32s cubic-bezier(.32,.72,0,1)}
+}
+@media (max-width:360px){.brand{font-size:17px}.ticker span:nth-child(2){display:none}}
+@media (prefers-reduced-motion:reduce){.top{transition:none}}
+/* Síguenos (Contacto) */
+.social{display:grid;gap:10px;margin-top:14px}
+.social:empty{display:none}
+.social-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.red{display:flex;align-items:center;justify-content:center;gap:10px;height:48px;border:1px solid var(--hair-2);border-radius:var(--r);background:var(--paper);text-decoration:none;font-weight:600;font-size:14px;transition:border-color .2s,background .2s,transform 160ms var(--ease)}
+.red svg{width:19px;height:19px}
+.red:active{transform:scale(.98)}
+@media (hover:hover) and (pointer:fine){.red:hover{border-color:var(--ink);background:var(--surface)}}
+@media (max-width:640px){.tools .soc{display:none}}
+/* ===== v24: letras para el teléfono ===== */
+/* Logotipo: monograma R (igual que el ícono de la pestaña) junto al nombre */
+.brand{display:inline-flex;align-items:center;gap:10px}
+.mono{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:6px;background:var(--ink);color:var(--paper);font-family:var(--f-display);font-weight:700;font-size:21px;line-height:1;padding-top:1px}
+/* Precio de etiqueta: Q pequeña arriba, número protagonista */
+.amt{display:inline-flex;align-items:flex-start;gap:2px}
+.cur{font-size:.68em;font-weight:600;letter-spacing:.02em;line-height:1;margin-top:.12em;margin-right:1px}
+.price{font-size:20px}
+.pd-price{font-size:32px}
+@media (max-width:640px){
+  .mono{width:26px;height:26px;font-size:18px;border-radius:5px}
+  .brand{gap:8px;font-size:18px}
+  /* Nombres de marca en tarjetas y pedido: sin adornos, legibles en pantalla pequeña */
+  .nm,.line .t b{font-family:var(--f-body);font-weight:700;font-stretch:92%;font-size:14px;letter-spacing:.07em;line-height:1.2}
+  .price{font-size:19px}
+}

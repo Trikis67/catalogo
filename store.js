@@ -66,11 +66,13 @@ function tags(p) {
   let h = "";
   if (p.before) h += '<span class="tg sale">Oferta −' + off(p) + "%</span>";
   if (NEWEST.has(p.code)) h += '<span class="tg new">Nuevo</span>';
-  if (p.tipo === "gorra") h += '<span class="tg">Gorra</span>';
   if (multi(p)) h += '<span class="tg">' + p.fotos.length + " fotos</span>";
   return h ? '<div class="tags">' + h + "</div>" : "";
 }
-const priceHtml = p => (p.before ? '<s class="was">' + money(p.before) + "</s>" : "") + "<span>" + money(p.price) + "</span>";
+/* Precio de etiqueta: la "Q" pequeña y el número protagonista */
+const amount = n => money(n).slice(CONFIG.currency.length).trim();
+const priceHtml = p => (p.before ? '<s class="was">' + money(p.before) + "</s>" : "")
+  + '<span class="amt" aria-label="' + esc(money(p.price)) + '"><span class="cur" aria-hidden="true">' + esc(CONFIG.currency) + '</span><span aria-hidden="true">' + amount(p.price) + "</span></span>";
 const notifyUrl = p => waUrl("Hola, me interesa " + (p.tipo === "gorra" ? "la gorra " : "la playera ") + p.marca + " " + p.code + ". ¿Me avisas cuando vuelva a estar disponible?");
 function toast(msg) {
   const t = $("#toast"); t.textContent = msg; t.classList.add("on");
@@ -106,7 +108,8 @@ const ICO = {
   prev: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
   next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
   minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg>',
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>'
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>',
+  check: '<svg class="ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 };
 
 /* Galería de la tarjeta: varias fotos que se deslizan, con flechas y puntos */
@@ -145,6 +148,14 @@ $("#tagline").textContent = CONFIG.tagline;
     var a = $(x[0]); if (!a) return;
     if (x[1]) a.href = x[1]; else a.hidden = true;
   });
+  /* "Síguenos" en Contacto: en el teléfono las redes salen de la cabecera para que quepa el nombre */
+  var redes = [["TikTok", C.tiktok, "#lnkTiktok"], ["Facebook", C.facebook, "#lnkFacebook"]].filter(function (x) { return x[1]; });
+  var box = $("#social");
+  if (box && redes.length) {
+    box.innerHTML = '<span class="lab">Síguenos</span><div class="social-row">' + redes.map(function (x) {
+      return '<a class="red" href="' + esc(x[1]) + '" target="_blank" rel="noopener">' + $(x[2]).innerHTML + "<span>" + x[0] + "</span></a>";
+    }).join("") + "</div>";
+  }
 })();
 $("#footBrand").textContent = CONFIG.brand;
 $("#yr").textContent = new Date().getFullYear();
@@ -236,9 +247,26 @@ function renderCats() {
     const n = PRODUCTS.filter(p => p.tipo !== "gorra" && p.sizes.includes(s)).length;
     h += '<button type="button" class="size" data-size="' + esc(s) + '" aria-pressed="' + (state.size === s ? "true" : "false") + '">' + esc(s) + "<sup>" + two(n) + '</sup><small>Talla</small></button>';
   });
+  const ind = $("#cats .sind");          // se conserva para que se deslice desde la talla anterior
   $("#cats").innerHTML = h;
+  if (ind) $("#cats").appendChild(ind);
+  slideInd($("#cats"), '.size[aria-pressed="true"]', "sind");
   catsMore();
 }
+/* Indicador que se desliza de la opción anterior a la nueva (continuidad, no un salto) */
+function slideInd(box, sel, cls) {
+  let ind = box.querySelector(":scope > ." + cls);
+  if (!ind) { ind = document.createElement("span"); ind.className = cls; ind.setAttribute("aria-hidden", "true"); box.appendChild(ind); }
+  box.classList.add("has-ind");
+  const on = box.querySelector(sel);
+  if (!on || !on.offsetWidth) { ind.style.opacity = "0"; return; }
+  ind.style.opacity = "1";
+  ind.style.width = on.offsetWidth + "px";
+  ind.style.transform = "translateX(" + on.offsetLeft + "px)";
+}
+const slideAll = () => { slideInd($("#cats"), '.size[aria-pressed="true"]', "sind"); slideInd($(".tabs"), 'button[aria-pressed="true"]', "tind"); };
+addEventListener("resize", slideAll);
+if (document.fonts) document.fonts.ready.then(slideAll);
 /* Difumina el borde derecho mientras queden opciones por deslizar */
 function catsMore() {
   const s = $("#cats");
@@ -250,7 +278,8 @@ $("#cats").addEventListener("click", e => {
   const b = e.target.closest(".size"); if (!b) return;
   state.size = b.dataset.size; pick = {}; renderCats(); render();
 });
-function setOnly(v) { state.only = v; $("#avAll").setAttribute("aria-pressed", String(!v)); $("#avYes").setAttribute("aria-pressed", String(v)); render(); }
+function setOnly(v) { state.only = v; $("#avAll").setAttribute("aria-pressed", String(!v)); $("#avYes").setAttribute("aria-pressed", String(v)); slideInd($(".tabs"), 'button[aria-pressed="true"]', "tind"); render(); }
+slideInd($(".tabs"), 'button[aria-pressed="true"]', "tind");
 $("#avAll").onclick = () => setOnly(false);
 $("#avYes").onclick = () => setOnly(true);
 $("#sort").onchange = e => { state.sort = e.target.value; render(); };
@@ -265,6 +294,8 @@ function visible() {
   else if (state.sort === "desc") list.sort((a, b) => b.price - a.price);
   else if (state.sort === "new") list.sort((a, b) => Number(b.id) - Number(a.id));
   else list.sort((a, b) => (BRANDS.get(a.bk) || "").localeCompare(BRANDS.get(b.bk) || "", "es") || byCodeOrder(a, b));
+  /* Siempre por categoría: primero playeras, después todas las gorras juntas (el orden elegido se mantiene dentro) */
+  list.sort((a, b) => (a.tipo === "gorra") - (b.tipo === "gorra"));
   return list;
 }
 function selSize(p) {
@@ -288,19 +319,29 @@ function render() {
     return;
   }
   const grouped = state.sort === "";
-  const counts = {};
-  list.forEach(p => { counts[p.bk] = (counts[p.bk] || 0) + 1; });
-  let html = "", last = null;
+  /* Encabezados: categoría (Playeras / Gorras) y, dentro, cada marca por separado */
+  const gk = p => p.tipo + "|" + p.bk;
+  const counts = {}, catN = {};
+  list.forEach(p => { counts[gk(p)] = (counts[gk(p)] || 0) + 1; catN[p.tipo] = (catN[p.tipo] || 0) + 1; });
+  const showCat = Object.keys(catN).length > 1;
+  const bh = showCat ? "h3" : "h2";
+  let html = "", last = null, lastCat = null;
   list.forEach((p, i) => {
-    if (grouped && p.bk !== last) {
-      last = p.bk;
-      html += '<div class="grp"><h2>' + esc(BRANDS.get(p.bk) || p.marca) + "</h2><span>" + two(counts[p.bk]) + (counts[p.bk] === 1 ? " modelo" : " modelos") + "</span></div>";
+    if (showCat && p.tipo !== lastCat) {
+      lastCat = p.tipo; last = null;
+      const n = catN[p.tipo];
+      html += '<div class="cat"><h2>' + (p.tipo === "gorra" ? "Gorras" : "Playeras") + "</h2><span>" + n + (n === 1 ? " producto" : " productos") + "</span></div>";
+    }
+    if (grouped && gk(p) !== last) {
+      last = gk(p);
+      const n = counts[last];
+      html += '<div class="grp"><' + bh + ">" + esc(BRANDS.get(p.bk) || p.marca) + "</" + bh + "><span>" + two(n) + (n === 1 ? " modelo" : " modelos") + "</span></div>";
     }
     const sel = selSize(p);
     html += '<article class="card' + (p.stock ? "" : " off") + '" data-code="' + esc(p.code) + '" style="--i:' + Math.min(i, 14) + '"><div class="hang">'
       + '<div class="pic" data-open="1">' + gal(p) + tags(p) + '<span class="st' + (p.stock ? "" : " off") + '">' + (p.stock ? "Disponible" : "Agotado") + "</span></div>"
       + '<div class="info"><h3 class="nm"><a href="?p=' + encodeURIComponent(slug(p.code)) + '" data-open="1">' + esc(p.marca) + '</a></h3><div class="meta"><span>' + esc(p.code) + "</span></div>"
-      + (p.tipo === "gorra" ? '<div class="sz"><span class="uni">Gorra · talla única</span></div><div hidden>' : '<div class="sz" role="group" aria-label="Elegir talla">')
+      + (p.tipo === "gorra" ? '<div class="sz"><span class="uni">Talla única</span></div><div hidden>' : '<div class="sz" role="group" aria-label="Elegir talla">')
       + p.sizes.map(s => '<button type="button" class="szb" data-size="' + esc(s) + '" aria-pressed="' + (s === sel ? "true" : "false") + '"' + (p.stock ? "" : " disabled") + ">" + esc(s) + "</button>").join("")
       + "</div></div>"
       + '<div class="buy"><span class="price' + (p.before ? " sale" : "") + '">' + priceHtml(p) + "</span>"
@@ -325,23 +366,29 @@ function pulse() {
   void n.offsetWidth;
   n.classList.add("pop"); b.classList.add("bump");
 }
-function fly(card) {
-  const box = card.querySelector(".pic"), el = card.querySelector(".shirt");
-  if (reduce || !box || !el || !el.animate) { pulse(); return; }
+/* La prenda "vuela" al botón del pedido: confirma dónde quedó (movimiento en pantalla, curva ease-in-out) */
+function flyFrom(box, el, over) {
+  if (reduce || !box || !el || !document.body.animate) { pulse(); return; }
   const r = box.getBoundingClientRect(), c = $("#cartBtn").getBoundingClientRect();
-  const g = document.createElement("div"); g.className = "fly";
+  const g = document.createElement("div"); g.className = "fly" + (over ? " over" : "");
   g.innerHTML = el.outerHTML;
-  const sx = r.left + r.width / 2 - 34, sy = r.top + r.height / 2 - 34;
+  const sx = r.left + r.width / 2 - 32, sy = r.top + r.height / 2 - 32;
   g.style.left = sx + "px"; g.style.top = sy + "px";
   document.body.appendChild(g);
-  const dx = c.left + c.width / 2 - 34 - sx, dy = c.top + c.height / 2 - 34 - sy;
+  const dx = c.left + c.width / 2 - 32 - sx, dy = c.top + c.height / 2 - 32 - sy;
   const a = g.animate([
-    { transform: "translate(0,0) scale(1.4) rotate(0deg)", opacity: 1 },
-    { transform: "translate(" + dx * .55 + "px," + (dy * .55 - 70) + "px) scale(1) rotate(-8deg)", opacity: 1, offset: .5 },
-    { transform: "translate(" + dx + "px," + dy + "px) scale(.25) rotate(6deg)", opacity: .3 }
-  ], { duration: 720, easing: "cubic-bezier(.45,0,.25,1)" });
+    { transform: "translate(0,0) scale(1.35)", opacity: 1 },
+    { transform: "translate(" + dx * .5 + "px," + (dy * .5 - 60) + "px) scale(.9)", opacity: 1, offset: .55 },
+    { transform: "translate(" + dx + "px," + dy + "px) scale(.3)", opacity: .2 }
+  ], { duration: 560, easing: "cubic-bezier(.77,0,.175,1)" });
   a.onfinish = () => { g.remove(); pulse(); };
   a.oncancel = () => g.remove();
+}
+/* Desde la tarjeta vuela la foto que el cliente está viendo */
+function fly(card) {
+  const imgs = card.querySelectorAll(".pic img.photo");
+  const el = imgs[Number(card.dataset.f) || 0] || imgs[0] || card.querySelector(".pic svg");
+  flyFrom(card.querySelector(".pic"), el);
 }
 $("#grid").addEventListener("click", e => {
   const arrow = e.target.closest(".gp,.gn");
@@ -369,8 +416,11 @@ $("#grid").addEventListener("click", e => {
   const card = b.closest(".card"), cp = byCode(b.dataset.code);
   add(keyOf(cp, b.dataset.size, card.dataset.f), 1);
   fly(card);
-  const old = b.textContent; b.textContent = "Agregado · " + b.dataset.size; b.classList.add("done");
-  setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1100);
+  /* El botón confirma con una palomita sin cambiar de ancho, y vuelve a "Agregar" */
+  if (!b.classList.contains("done")) b.style.minWidth = b.offsetWidth + "px";
+  b.innerHTML = ICO.check + "<span>Agregado</span>"; b.classList.add("done");
+  clearTimeout(b._t);
+  b._t = setTimeout(() => { b.textContent = "Agregar"; b.classList.remove("done"); b.style.minWidth = ""; }, 1200);
 });
 
 /* ===== Pedido (carrito) ===== */
@@ -399,17 +449,42 @@ function renderCart() {
   $("#dockT").textContent = money(t.total);
   $("#dock").classList.toggle("on", t.count > 0 && !$("#drawer").classList.contains("on"));
   $("#toForm").disabled = t.count === 0;
-  $("#lines").innerHTML = t.keys.length ? t.keys.map(k => {
+  $("#lines").innerHTML = t.keys.length ? t.keys.map((k, i) => {
     const { code, size, f } = parseKey(k), p = byCode(code);
-    return '<div class="line"><div class="th">' + thumb(p, f) + '</div><div class="t"><b>' + esc(fullName(p, size, f)) + "</b><span>" + esc(code) + " · " + money(p.price) + "</span>"
+    return '<div class="line" style="--n:' + Math.min(i, 6) + '"><div class="th">' + thumb(p, f) + '</div><div class="t"><b>' + esc(fullName(p, size, f)) + "</b><span>" + esc(code) + " · " + money(p.price) + "</span>"
       + '<div class="qty"><button type="button" data-d="-1" data-c="' + esc(k) + '" aria-label="Quitar uno">' + ICO.minus + '</button><output>' + cart[k] + '</output><button type="button" data-d="1" data-c="' + esc(k) + '" aria-label="Agregar uno">' + ICO.plus + '</button></div></div>'
       + '<div class="sub">' + money(cart[k] * p.price) + "</div></div>";
   }).join("") : '<div class="none">Tu pedido está vacío.<br>Agrega productos desde el catálogo.</div>';
 }
+/* Al quitar la última pieza, la línea se cierra (220 ms) en lugar de desaparecer de golpe */
 $("#lines").addEventListener("click", e => {
   const b = e.target.closest("button[data-c]"); if (!b) return;
-  add(b.dataset.c, Number(b.dataset.d));
+  const k = b.dataset.c, d = Number(b.dataset.d), line = b.closest(".line");
+  if (d < 0 && cart[k] === 1 && line && !reduce && line.animate) {
+    if (line.dataset.out) return;
+    line.dataset.out = "1"; line.style.overflow = "hidden";
+    const h = line.offsetHeight;
+    line.animate([{ height: h + "px", opacity: 1 }, { height: "0px", opacity: 0, paddingTop: "0px", paddingBottom: "0px", borderBottomWidth: "0px" }],
+      { duration: 220, easing: "cubic-bezier(.23,1,.32,1)", fill: "forwards" }).onfinish = () => add(k, d);
+    return;
+  }
+  add(k, d);
 });
+/* La cabecera muestra su línea y una sombra suave solo cuando la página ya bajó */
+const topBar = $(".top"), phone = matchMedia("(max-width:640px)");
+/* En el teléfono la cabecera se esconde al bajar (más espacio para las fotos) y reaparece al subir */
+let lastY = scrollY;
+const onScroll = () => {
+  const y = scrollY;
+  topBar.classList.toggle("scrolled", y > 4);
+  if (phone.matches) {
+    document.documentElement.style.setProperty("--top-h", topBar.offsetHeight + "px");
+    if (y > lastY + 6 && y > 240) document.body.classList.add("hide-top");
+    else if (y < lastY - 6 || y < 240) document.body.classList.remove("hide-top");
+  } else document.body.classList.remove("hide-top");
+  if (Math.abs(y - lastY) > 6) lastY = y;
+};
+addEventListener("scroll", onScroll, { passive: true }); onScroll();
 $("#clear").onclick = () => { cart = {}; saveCart(); renderCart(); };
 
 /* ===== Panel por pasos ===== */
@@ -425,7 +500,12 @@ function show(v) {
 function openCart(v) {
   $("#drawer").classList.toggle("on", v); $("#scrim").classList.toggle("on", v);
   $("#drawer").setAttribute("aria-hidden", String(!v));
-  if (v) show("cart");
+  if (v) {
+    show("cart");
+    /* Solo al abrir: las prendas entran escalonadas (no en cada cambio de cantidad) */
+    $("#lines").classList.add("intro"); clearTimeout(openCart.t);
+    openCart.t = setTimeout(() => $("#lines").classList.remove("intro"), 700);
+  }
   renderCart();
 }
 $("#cartBtn").onclick = () => openCart(true);
@@ -521,10 +601,24 @@ function sizeGuide() {
     + g.filas.map(r => "<tr>" + r.map(c => "<td>" + esc(c) + "</td>").join("") + "</tr>").join("") + "</tbody></table>"
     + (g.nota ? "<p>" + esc(g.nota) + "</p>" : "") + "</details>";
 }
+/* Foto grande de la ficha: al cambiar, la nueva aparece encima de la anterior con un fundido
+   (sin pasar por vacío), y no se rehace si es la misma (por ejemplo, al elegir talla) */
 function pdMedia(p) {
-  const fs = p.fotos.length ? p.fotos : [];
-  $("#pdMain").innerHTML = fs.length ? '<img class="photo" src="' + esc(fs[pdAt]) + '" alt="' + esc(p.marca + " " + p.code) + '">' : pic(p);
-  markLoaded($("#pdMain"));
+  const fs = p.fotos.length ? p.fotos : [], main = $("#pdMain");
+  if (!fs.length) main.innerHTML = pic(p);
+  else {
+    const src = fs[pdAt], cur = main.querySelector("img.photo:last-child");
+    if (!cur || cur.dataset.src !== src) {
+      const img = new Image();
+      img.className = "photo"; img.alt = p.marca + " " + p.code; img.dataset.src = src; img.src = src;
+      if (cur && !reduce) {
+        img.classList.add("swap"); main.appendChild(img);
+        const done = () => main.querySelectorAll("img.photo").forEach(x => { if (x !== img) x.remove(); });
+        img.addEventListener("transitionend", done, { once: true }); setTimeout(done, 800);
+      } else { main.innerHTML = ""; main.appendChild(img); }
+      if (img.complete) img.classList.add("ld");
+    }
+  }
   $("#pdTh").innerHTML = fs.length > 1 ? fs.map((u, i) => '<button type="button" data-i="' + i + '" aria-label="Foto ' + (i + 1) + '" aria-pressed="' + (i === pdAt) + '"><img src="' + esc(u) + '" alt="" loading="lazy" decoding="async"></button>').join("") : "";
 }
 function pdRender() {
@@ -558,15 +652,30 @@ function openDetail(code, fromUrl, f) {
   pdLast = fromUrl ? null : document.activeElement;
   const card = document.querySelector('.card[data-code="' + CSS.escape(p.code) + '"]');
   pdCode = p.code; pdAt = fotoIdx(p, f != null ? f : card && card.dataset.f); pdSize = selSize(p);
+  $("#pdMain").innerHTML = "";
   pdRender();
+  if ($("#pd").dataset.out) {   /* se abrió otra ficha mientras la anterior se cerraba */
+    [$(".pd-box"), $("#pdBg")].forEach(el => el.getAnimations().forEach(a => a.cancel()));
+    delete $("#pd").dataset.out;
+  }
   $("#pd").hidden = false; document.body.classList.add("lock");
   $("#pdX").focus({ preventScroll: true });
   syncUrl();
   document.title = p.marca + " " + p.code + " · " + CONFIG.brand;
 }
-function closeDetail() {
+function closeDetail(swiped) {
   if ($("#pd").hidden) return;
-  $("#pd").hidden = true; document.body.classList.remove("lock"); pdCode = null;
+  /* Salida rápida (140 ms, más corta que la entrada) en lugar de desaparecer de golpe.
+     Si se cerró deslizando, la hoja ya salió de la pantalla: se oculta directo. */
+  const box = $(".pd-box"), bg = $("#pdBg");
+  if (swiped === true) { $("#pd").hidden = true; box.style.transform = ""; bg.style.opacity = ""; box.classList.remove("settle"); }
+  else if (!reduce && box.animate && !$("#pd").dataset.out) {
+    $("#pd").dataset.out = "1";
+    bg.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: "ease-out", fill: "forwards" });
+    box.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(8px) scale(.99)" }], { duration: 140, easing: "ease-out", fill: "forwards" })
+      .onfinish = () => { $("#pd").hidden = true; delete $("#pd").dataset.out; box.getAnimations().forEach(a => a.cancel()); bg.getAnimations().forEach(a => a.cancel()); };
+  } else if (!$("#pd").dataset.out) $("#pd").hidden = true;
+  document.body.classList.remove("lock"); pdCode = null;
   const u = new URL(location.href); u.searchParams.delete("p"); u.searchParams.delete("f");
   history.replaceState(null, "", u.pathname + u.search);
   document.title = CONFIG.brand;
@@ -591,7 +700,8 @@ $("#pdInfo").addEventListener("click", async e => {
   const sb = e.target.closest(".szb");
   if (sb && !sb.disabled) { pdSize = sb.dataset.size; pick[p.code] = pdSize; pdRender(); return; }
   if (e.target.closest("#pdAdd")) {
-    add(keyOf(p, pdSize, pdAt), 1); pulse();
+    add(keyOf(p, pdSize, pdAt), 1);
+    flyFrom($("#pdMain"), $("#pdMain").querySelector("img.photo:last-child") || $("#pdMain svg"), true);
     toast("Agregado: " + fullName(p, pdSize, pdAt));
     const c = document.querySelector('.card[data-code="' + CSS.escape(p.code) + '"]');
     if (c) { c.dataset.f = pdAt; const g = c.querySelector(".gal"); if (g) g.scrollTo({ left: pdAt * g.clientWidth }); c.querySelectorAll(".szb").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.size === pdSize))); const a = c.querySelector("button.add"); if (a) a.dataset.size = pdSize; }
@@ -604,6 +714,38 @@ $("#pdInfo").addEventListener("click", async e => {
     catch (x) { prompt("Copia el enlace:", url); }
   }
 });
+/* Teléfono: deslizar la hoja hacia abajo la cierra (desde arriba del todo), como en una app */
+(function () {
+  const box = $(".pd-box"), bg = $("#pdBg");
+  let y0 = null, dy = 0, t0 = 0;
+  box.addEventListener("touchstart", e => {
+    y0 = phone.matches && box.scrollTop <= 0 && !$("#pd").dataset.out ? e.touches[0].clientY : null;
+    dy = 0; t0 = Date.now();
+  }, { passive: true });
+  box.addEventListener("touchmove", e => {
+    if (y0 === null) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy <= 0 || box.scrollTop > 0) { if (dy <= 0) { box.style.transform = ""; bg.style.opacity = ""; } return; }
+    e.preventDefault();
+    box.classList.add("dragging");
+    box.style.transform = "translateY(" + dy + "px)";
+    bg.style.opacity = String(Math.max(.2, 1 - dy / 500));
+  }, { passive: false });
+  box.addEventListener("touchend", () => {
+    if (y0 === null) return;
+    y0 = null; box.classList.remove("dragging");
+    if (dy <= 0) return;
+    const fast = dy / Math.max(1, Date.now() - t0) > .5;
+    box.classList.add("settle");
+    if (dy > 120 || (dy > 40 && fast)) {
+      box.style.transform = "translateY(100%)"; bg.style.opacity = "0";
+      setTimeout(() => closeDetail(true), 300);
+    } else {
+      box.style.transform = ""; bg.style.opacity = "";
+      setTimeout(() => box.classList.remove("settle"), 340);
+    }
+  });
+})();
 /* Escape cierra primero la ficha y después el pedido */
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape" || $("#pd").hidden || !$("#lb").hidden) return;

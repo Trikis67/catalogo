@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>El Rack de las Playeras</title>
 <meta name="description" content="Playeras y gorras por talla con envío a domicilio. Elige tu talla, agrega al pedido y confirma por WhatsApp.">
 <link rel="canonical" href="https://elrackdelasplayerasgt.lat/">
@@ -25,18 +25,18 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Archivo:wdth,wght@62..125,400..800&display=swap">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..700&family=Archivo:wdth,wght@62..125,400..800&display=swap">
+<link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
 <div class="ticker" id="ticker" aria-hidden="true"></div>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#" id="brand"><span id="brandName"></span></a>
+    <a class="brand" href="#" id="brand"><span class="mono" aria-hidden="true">R</span><span id="brandName"></span></a>
     <label class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
-      <input id="q" type="search" placeholder="Buscar marca o código" autocomplete="off" aria-label="Buscar productos">
+      <input id="q" type="search" enterkeyhint="search" placeholder="Buscar marca o código" autocomplete="off" aria-label="Buscar productos">
     </label>
     <div class="tools">
       <a class="soc" id="lnkTiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok">
@@ -98,6 +98,7 @@
     </div>
     <div class="acts">
       <div class="was" id="was"></div>
+      <div class="social" id="social"></div>
     </div>
   </div>
 </section>
@@ -114,6 +115,7 @@
 <div class="pd" id="pd" hidden>
   <div class="pd-bg" id="pdBg"></div>
   <section class="pd-box" role="dialog" aria-modal="true" aria-labelledby="pdName">
+    <span class="pd-grab" aria-hidden="true"></span>
     <button class="xbtn pd-x" id="pdX" type="button" aria-label="Cerrar producto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <div class="pd-media"><div class="pd-main" id="pdMain"></div><div class="pd-th" id="pdTh"></div></div>
     <div class="pd-info" id="pdInfo"></div>
@@ -151,7 +153,7 @@
     <form id="form" novalidate class="view" style="animation:none">
       <div class="scroll">
         <div class="form">
-          <div class="field" id="gName"><label for="fName">Nombre completo</label><input id="fName" type="text" autocomplete="name" placeholder="Ej. María López"><span class="err" id="eName"></span></div>
+          <div class="field" id="gName"><label for="fName">Nombre completo</label><input id="fName" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Ej. María López"><span class="err" id="eName"></span></div>
           <div class="field"><label for="fPhone">Tu teléfono (opcional)</label><input id="fPhone" type="tel" autocomplete="tel" placeholder="Ej. 5555 1234"></div>
           <p class="envnote"><b>Envío a domicilio.</b> No tenemos tienda física: te lo llevamos. El costo del envío se confirma por WhatsApp.</p>
           <div class="pair">
@@ -188,6 +190,6 @@
 
 <script src="config.js?v=11"></script>
 <script src="gt.js?v=11"></script>
-<script src="store.js?v=14"></script>
+<script src="store.js?v=24"></script>
 </body>
 </html>
